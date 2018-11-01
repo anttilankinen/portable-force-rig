@@ -1,0 +1,15 @@
+version: "3.2"
+
+services:
+  data-upload:
+    build: ./service.data-upload
+    env_file: ./.env
+    image: portable-force-rig/service.data-upload:1.0
+    container_name: data-upload-service
+    ports:
+      - 7001:80
+    volumes:
+      - ./service.data-upload:/usr/src/app
+      - type: bind
+        source: ./data/readings.sqlite
+        target: /usr/src/app/data/readings.sqlite
