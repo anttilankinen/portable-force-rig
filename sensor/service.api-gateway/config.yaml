@@ -1,6 +1,6 @@
 apis:
   service.data-upload:
     name: Data Upload Service
-    prefix: service.data-upload
+    prefix: data-upload
     upstream_url: http://service.data-upload
     allow_cross_origin: true
