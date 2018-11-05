@@ -3,15 +3,15 @@ import sqlite3
 
 def main():
 
-    sqlite_conn = sqlite3.connect("readings.sqlite")
+    sqlite_conn = sqlite3.connect('readings.sqlite')
     cursor = sqlite_conn.cursor()
 
-    cursor.execute("SELECT * FROM data")
+    cursor.execute('SELECT * FROM data')
     data = cursor.fetchall()
     print(data)
 
     sqlite_conn.commit()
     sqlite_conn.close()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
