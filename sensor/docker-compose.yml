@@ -1,19 +1,16 @@
 version: "3.2"
 
 services:
-  service.data-upload:
-    build: ./service.data-upload
+  service.controller:
+    build: ./service.controller
     env_file: ./.env
-    image: portable-force-rig/service.data-upload:1.0
-    container_name: service.data-upload
+    image: portable-force-rig/service.controller:1.0
+    container_name: service.controller
     ports:
-      - 7001:80
+      - 7000:80
     volumes:
-      - ./service.data-upload:/usr/src/app
-      - type: bind
-        source: ./data/readings.sqlite
-        target: /usr/src/app/data/readings.sqlite
-
+      - ./service.controller:/usr/src/app
+      
   service.api-gateway:
     image: jaceys/drawbridge
     env_file: ./.env
@@ -21,7 +18,20 @@ services:
     volumes:
       - ./service.api-gateway/config.yaml:/config/config.yaml
     ports:
+      - 7001:80
+
+  service.data-upload:
+    build: ./service.data-upload
+    env_file: ./.env
+    image: portable-force-rig/service.data-upload:1.0
+    container_name: service.data-upload
+    ports:
       - 7002:80
+    volumes:
+      - ./service.data-upload:/usr/src/app
+      - type: bind
+        source: ./data/readings.sqlite
+        target: /usr/src/app/data/readings.sqlite
 
 volumes:
   sqlite-data:

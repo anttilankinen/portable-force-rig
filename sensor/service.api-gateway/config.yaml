@@ -4,3 +4,9 @@ apis:
     prefix: data-upload
     upstream_url: http://service.data-upload
     allow_cross_origin: true
+
+  service.controller:
+    name: Controller service
+    prefix: controller
+    upstream_url: http://service.controller
+    allow_cross_origin: true

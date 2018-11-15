@@ -1,19 +1,16 @@
 {
-  "name": "web-server",
+  "name": "service.controller",
   "version": "1.0.0",
-  "description": "web-server",
-  "main": "server.js",
+  "description": "service.controller",
+  "main": "controller.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-client": "cd client && npm run build",
-    "server": "node server.js",
-    "start": "npm run build-client && npm run server"
+    "start": "node controller.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4",
-    "mongoose": "^5.3.9"
+    "express": "^4.16.4"
   },
   "repository": {
     "type": "git",

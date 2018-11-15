@@ -1,7 +1,6 @@
 const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
-
 const server = express();
 
 server.use(express.static(path.join(__dirname, 'client/build')));
@@ -15,7 +14,6 @@ server.get('*', (req, res) => {
 });
 
 const port = process.env.PORT || 3001;
-
 server.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
