@@ -1,16 +1,6 @@
 version: "3.2"
 
 services:
-  service.controller:
-    build: ./service.controller
-    env_file: ./.env
-    image: portable-force-rig/service.controller:1.0
-    container_name: service.controller
-    ports:
-      - 7000:80
-    volumes:
-      - ./service.controller:/usr/src/app
-      
   service.api-gateway:
     image: jaceys/drawbridge
     env_file: ./.env
@@ -20,18 +10,46 @@ services:
     ports:
       - 7001:80
 
+  service.core-api:
+    build: ./service.core-api
+    env_file: ./.env
+    image: portable-force-rig/service.core-api:1.0
+    container_name: service.core-api
+    ports:
+      - 7002:80
+    volumes:
+      - ./service.core-api:/usr/src/app
+      - /usr/src/app/node_modules
+      - type: bind
+        source: ./data/readings.sqlite
+        target: /usr/src/app/data/readings.sqlite
+
+  service.sensor-controller:
+    build: ./service.sensor-controller
+    env_file: ./.env
+    image: portable-force-rig/service.sensor-controller:1.0
+    container_name: service.sensor-controller
+    ports:
+      - 7003:80
+    volumes:
+      - ./service.sensor-controller:/usr/src/app
+
   service.data-upload:
     build: ./service.data-upload
     env_file: ./.env
     image: portable-force-rig/service.data-upload:1.0
     container_name: service.data-upload
     ports:
-      - 7002:80
+      - 7004:80
     volumes:
       - ./service.data-upload:/usr/src/app
       - type: bind
         source: ./data/readings.sqlite
         target: /usr/src/app/data/readings.sqlite
 
-volumes:
-  sqlite-data:
+  redis:
+    image: redis:alpine
+    env_file: ./.env
+    container_name: redis-server
+    ports:
+      - 6379:6379

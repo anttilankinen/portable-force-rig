@@ -1,12 +1,18 @@
 apis:
+  service.core-api:
+    name: Core API
+    prefix: core
+    upstream_url: http://service.core-api
+    allow_cross_origin: true
+
+  service.sensor-controller:
+    name: Sensor Controller Service
+    prefix: sensor-controller
+    upstream_url: http://service.sensor-controller
+    allow_cross_origin: true
+
   service.data-upload:
     name: Data Upload Service
     prefix: data-upload
     upstream_url: http://service.data-upload
-    allow_cross_origin: true
-
-  service.controller:
-    name: Controller service
-    prefix: controller
-    upstream_url: http://service.controller
     allow_cross_origin: true

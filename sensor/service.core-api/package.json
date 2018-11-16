@@ -1,16 +1,18 @@
 {
-  "name": "service.controller",
+  "name": "service.core-api",
   "version": "1.0.0",
-  "description": "service.controller",
-  "main": "controller.js",
+  "description": "service.core-api",
+  "main": "api.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node controller.js"
+    "start": "node api.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4"
+    "koa": "^2.6.2",
+    "koa-router": "^7.4.0",
+    "sqlite3": "^4.0.4"
   },
   "repository": {
     "type": "git",
