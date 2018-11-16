@@ -10,13 +10,24 @@ services:
     ports:
       - 7001:80
 
+  service.event-bus:
+    build: ./service.event-bus
+    env_file: ./.env
+    image: portable-force-rig/service.event-bus:1.0
+    container_name: service.event-bus
+    ports:
+      - 7002:80
+    volumes:
+      - ./service.event-bus:/usr/src/app
+      - /usr/src/app/node_modules
+
   service.core-api:
     build: ./service.core-api
     env_file: ./.env
     image: portable-force-rig/service.core-api:1.0
     container_name: service.core-api
     ports:
-      - 7002:80
+      - 7003:80
     volumes:
       - ./service.core-api:/usr/src/app
       - /usr/src/app/node_modules
@@ -30,7 +41,7 @@ services:
     image: portable-force-rig/service.sensor-controller:1.0
     container_name: service.sensor-controller
     ports:
-      - 7003:80
+      - 7004:80
     volumes:
       - ./service.sensor-controller:/usr/src/app
 
@@ -40,7 +51,7 @@ services:
     image: portable-force-rig/service.data-upload:1.0
     container_name: service.data-upload
     ports:
-      - 7004:80
+      - 7005:80
     volumes:
       - ./service.data-upload:/usr/src/app
       - type: bind

@@ -1,0 +1,25 @@
+{
+  "name": "service.event-bus",
+  "version": "1.0.0",
+  "description": "service.event-bus",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anttilankinen/portable-force-rig.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anttilankinen/portable-force-rig/issues"
+  },
+  "homepage": "https://github.com/anttilankinen/portable-force-rig#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "redis": "^2.8.0",
+    "socket.io": "^2.1.1"
+  }
+}
