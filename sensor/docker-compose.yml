@@ -1,6 +1,18 @@
 version: "3.2"
 
 services:
+  web-client:
+    build:
+      context: ./web-client
+      dockerfile: prod.dockerfile
+    env_file: ./.env
+    image: portable-force-rig/web-client:1.0
+    container_name: web-client
+    ports:
+      - 7000:80
+    volumes:
+      - ./web-client/build:/usr/share/nginx/html
+
   service.api-gateway:
     image: jaceys/drawbridge
     env_file: ./.env

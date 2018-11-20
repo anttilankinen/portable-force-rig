@@ -1,17 +1,19 @@
 const Router = require('koa-router');
 const Koa = require('koa');
+const bodyParser = require('koa-body')();
 const router = new Router();
 const api = new Koa();
 
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./data/readings.sqlite');
 
-router.get('/api/data', (ctx, next) => {
- ctx.body = 'Welcome to the Portable Force Rig Core API!';
+router.get('/data', (ctx, next) => {
+  ctx.body = 'Welcome to the Portable Force Rig Core API!';
 });
 
-router.post('/api/data', (ctx, next) => {
- ctx.body = 'Saving to the SQLite store..';
+router.post('/data', bodyParser, (ctx, next) => {
+  console.log(`Saving new readings to database: ${ctx.request.body.data}`);
+  ctx.body = 'Readings successfully saved to the database!';
 });
 
 api.use(router.routes());

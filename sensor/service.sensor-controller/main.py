@@ -5,15 +5,14 @@ import threading
 from time import sleep
 from flask import Flask
 
-REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_HOST = os.getenv('DOCKER_HOST')
 REDIS_PORT = int(os.getenv('REDIS_PORT'))
 
 if __name__ == '__main__':
 
     app = Flask(__name__)
-    redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
+    redis_client = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=0)
     reddis_channel = redis_client.pubsub()
-    reddis_channel.subscribe('sensor-data')
 
     # start thread to read from GPIO
     @app.route('/start')
@@ -22,7 +21,7 @@ if __name__ == '__main__':
         value = random.uniform(10, 100)
         # publish to redis
         redis_client.publish('sensor-data', f'{round(value, 2)}')
-        return f'Started reading from sensor..'
+        return 'Started reading from sensor..'
 
     # stop thread to read from GPIO
     @app.route('/stop')
