@@ -11,9 +11,12 @@ router.get('/data', (ctx, next) => {
   ctx.body = 'Welcome to the Portable Force Rig Core API!';
 });
 
-router.post('/data', bodyParser, (ctx, next) => {
-  console.log(`Saving new readings to database: ${ctx.request.body.data}`);
-  ctx.body = 'Readings successfully saved to the database!';
+router.post('/data', bodyParser, async (ctx, next) => {
+  let data = ctx.request.body.data;
+  let dataString = data.join(', ');
+  console.log(`Saving new readings to database: ${dataString}`);
+  db.run('INSERT INTO data (ant_size, readings) VALUES (?, ?)', [1.76, `[${dataString}]`])
+  ctx.body = `Readings successfully saved to the database: ${data}`;
 });
 
 api.use(router.routes());

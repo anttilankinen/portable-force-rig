@@ -11,12 +11,15 @@ class App extends Component {
 
   saveData = () => {
     const JSONdata = JSON.stringify({ data: this.state.data })
-    fetch('/api/core/data', {
+    fetch('/api/rpi/data', {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSONdata,
     }).then(res => res.text())
-    .then(data => console.log(data));
+    .then(data => {
+      console.log(data);
+      this.setState({ data: [] })
+    });
   }
 
   uploadData = () => {
@@ -36,7 +39,7 @@ class App extends Component {
   render() {
     return (
       <div style={{ textAlign: 'center' }}>
-        <h1>Portable Force Rig API</h1>
+        <h1>Portable Force Rig Dashboard</h1>
         <h4>{this.state.data.join(', ')}</h4>
         <button onClick={this.saveData}>Save</button>
         <button onClick={this.uploadData}>Upload</button>

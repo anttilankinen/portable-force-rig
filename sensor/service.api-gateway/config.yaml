@@ -1,7 +1,7 @@
 apis:
   service.core-api:
     name: Core API
-    prefix: api/core
+    prefix: api/rpi
     upstream_url: http://service.core-api
     allow_cross_origin: true
 

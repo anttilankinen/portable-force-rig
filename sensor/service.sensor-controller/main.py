@@ -2,7 +2,6 @@ import os
 import random
 import redis
 import threading
-from time import sleep
 from flask import Flask
 
 REDIS_HOST = os.getenv('DOCKER_HOST')
