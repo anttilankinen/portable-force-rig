@@ -1,15 +1,12 @@
 #!/usr/bin/env python
-# PPS SingleTact Demo
-# Written by Ardhan Madras <ardhan@rocksis.net>
-#
+# Based on PPS SingleTact Demo
+# https://github.com/SingleTact/RaspberryPiDemo/blob/master/pps-singletact.py
 
-import cairo
 import sys
 import math
 import time
 import random
 import threading
-from logo import *
 import subprocess
 import argparse
 
