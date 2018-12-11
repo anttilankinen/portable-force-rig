@@ -10,10 +10,15 @@ from picamera import PiCamera
 # Name of the temporary video
 temp_video = 'test.h264'
 
-# Capture 30 seconds of 640p
+# Settings of the PiCamera
 camera = picamera.PiCamera()
-camera.framerate = 60
+camera.framerate = 90
 camera.resolution = (640, 480)
+exposure_mode = 'sports'
+#Checking the highest framerate
+print(camera.framerate)
+
+# Recording script
 camera.start_recording(temp_video)
 print("Camera Recording")
 camera.wait_recording(30)
