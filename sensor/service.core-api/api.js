@@ -18,8 +18,7 @@ router.get('/data', async (ctx, next) => {
 });
 
 router.post('/data', bodyParser, async (ctx, next) => {
-  let data = ctx.request.body.data;
-  let dataString = `[${data.join(', ')}]`;
+  let dataString = `[${ctx.request.body.data.join(', ')}]`;
   console.log(`Saving new readings to database: ${dataString}`);
   try {
     const db = await dbPromise;

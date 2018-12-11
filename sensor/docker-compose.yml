@@ -1,4 +1,4 @@
-version: "3.2"
+version: "3.5"
 
 services:
   web-client:
@@ -14,7 +14,7 @@ services:
       - ./web-client/build:/usr/share/nginx/html
 
   service.api-gateway:
-    image: jaceys/drawbridge
+    image: jaceys/drawbridge:1.0
     env_file: ./.env
     container_name: service.api-gateway
     volumes:
