@@ -55,7 +55,7 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    const socket = socketIOClient('http://192.168.99.100:7002');
+    const socket = socketIOClient('http://localhost:7002');
     socket.on('connected', message => console.log(message));
     socket.on('new data', message => {
       this.setState({ current: [...this.state.current, message.data] });

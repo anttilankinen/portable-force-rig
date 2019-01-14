@@ -32,7 +32,7 @@ router.post('/data', bodyParser, async (ctx, next) => {
 api.use(router.routes());
 api.use(router.allowedMethods());
 
-const port = 80 || process.env.PORT;
+const port = process.env.PORT || 80;
 api.listen(port, () => {
   console.log(`Core API listening on port ${port}`);
 });

@@ -4,11 +4,10 @@ import redis
 import threading
 from flask import Flask
 
-REDIS_HOST = os.getenv('DOCKER_HOST')
 REDIS_PORT = int(os.getenv('REDIS_PORT'))
 
 app = Flask(__name__)
-redis_client = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=0)
+redis_client = redis.StrictRedis(host='redis', port=REDIS_PORT, db=0)
 reddis_channel = redis_client.pubsub()
 
 # start thread to read from GPIO
