@@ -25,7 +25,7 @@ redisClient.on('message', (channel, data) => {
   io.emit('new data', { data: data });
 });
 
-const port = 80 || process.env.PORT;
+const port = process.env.PORT || 80;
 server.listen(port, () => {
   console.log(`Event Bus listening on port ${port}`);
 });
