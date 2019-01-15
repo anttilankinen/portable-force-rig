@@ -5,6 +5,8 @@
   "homepage": "./",
   "proxy": "http://localhost:3001",
   "dependencies": {
+    "pusher": "^2.2.0",
+    "pusher-js": "^4.3.1",
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
     "react-scripts": "2.1.1",
