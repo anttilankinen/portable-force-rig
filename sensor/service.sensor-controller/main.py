@@ -19,11 +19,15 @@ THREAD_IS_RUN = False
 DEV_BUS = 1
 DEV_ADDRESS = 0x04
 DEV_CTX = None
+ZEROED = False
+BIAS = 0
 
 def read_device(out_file):
     global ELAPSED_TIME
     global THREAD_IS_RUN
     global DEV_ADDRESS
+    global ZEROED
+    global BIAS
     timestamp = 1
 
     while THREAD_IS_RUN:
@@ -48,8 +52,17 @@ def read_device(out_file):
 
         if frameindex == 0xffff and timestamp == 0xffff: #i2c read error
             continue
+
         if value > 768: #out of bounds
             continue
+
+        if ZEROED:
+            value = value - BIAS
+        else
+            BIAS = value
+            value = 0
+            ZEROED = True
+
         out_file.write('%i, %i, %i, %.2f\n' % (frameindex, timestamp, value,
             ELAPSED_TIME))
         redis_client.publish('sensor-data', f'{value}')
