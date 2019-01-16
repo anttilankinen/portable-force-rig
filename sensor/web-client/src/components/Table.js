@@ -4,10 +4,12 @@ const TableHeader = props => {
   return (
     <thead>
       <tr>
-        <th className="two wide">#</th>
+        <th className="one wide">#</th>
         <th className="two wide">Date</th>
         <th className="two wide">Ant Size</th>
-        <th className="ten wide">Force Readings</th>
+        <th className="six wide">Force Readings</th>
+        <th className="two wide">Max. Bite Force</th>
+        <th className="three wide"></th>
       </tr>
     </thead>
   );
@@ -21,6 +23,12 @@ const TableBody = props => {
         <td>{row.date}</td>
         <td>{row.antSize}</td>
         <td>{row.readings}</td>
+        <td>-</td>
+        <td>
+          <button className="ui violet button">
+            <i className="info circle icon"></i>View
+          </button>
+        </td>
       </tr>
     );
   });
