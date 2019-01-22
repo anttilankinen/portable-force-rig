@@ -3,11 +3,10 @@
 # https://github.com/SingleTact/RaspberryPiDemo/blob/master/pps-singletact.py
 
 import sys
-import math
 import time
 import random
 import threading
-import subprocess
+import smbus
 import argparse
 
 def get_args():
@@ -16,80 +15,82 @@ def get_args():
     parser.add_argument("--verbose", default=False)
     return parser.parse_args()
 
-DEVICE_ENABLED = False
-try:
-    import smbus
-    DEVICE_ENABLED = True
-except ImportError:
-    pass
-res = (1280, 720)
-WINDOW_WIDTH = int(res[0])
-WINDOW_HEIGHT = int(res[1])
-GRAPH_WIDTH = WINDOW_WIDTH - 75
-GRAPH_HEIGHT = WINDOW_HEIGHT - 60
-GRAPH_X_START = 65
-GRAPH_Y_START = 10
 INTERVAL = 25 # In ms
 ELAPSED_TIME = 0
 
-
-SECONDS = []
-SECOND_MAX = 30
-SECOND_SPACE = GRAPH_WIDTH / float(SECOND_MAX)
- 
-CURVES = []
-CURVE_MAX = SECOND_MAX * (1000 / INTERVAL)
-CURVE_SPACE = GRAPH_WIDTH / float(CURVE_MAX)
-
-VALUE_MAX = 760
-VALUE_MIN = -240
-VALUE_STEP = 20
-VALUE_SPACE = 50
-
+INTERVAL = 25 # in ms
+ELAPSED_TIME = 0
 READ_THREAD = None
 THREAD_IS_RUN = False
-KEY_IS_PRESSED = False
-TOUCH_BEGIN = False
-TOUCH_TIME = 0
-timecount=0
-
-DEV_BUS = 1
-DEV_ADDRESS = 0x04
-DEV_CTX = None
+DEV1_BUS = 1
+DEV1_ADDRESS = 0x04
+DEV1_CTX = None
+DEV2_BUS = 1
+DEV2_ADDRESS = 0x04
+DEV2_CTX = None
+ZEROED = False
+BIAS1 = 0
+BIAS2 = 0
 
 def read_device(out_file):
     global ELAPSED_TIME
     global THREAD_IS_RUN
-    global DEV_ADDRESS
+    global DEV1_ADDRESS
+    global DEV2_ADDRESS
+    global DEV1_CTX
+    global DEV2_CTX
+    global ZEROED
+    global BIAS1
+    global BIAS2
     timestamp = 1
-    
+
     while THREAD_IS_RUN:
         value, frameindex = 0, 0
-        
+
             # SingleTac manual section 2.4.3 I2C Read Operation:
-            # Where a Read operation is not preceded by a Read Request operation the read location defaults to
-            # 128 (the sensor output location) and consecutive reads will therefore simply read the default 32 bytes
+            # Where a Read operation is not preceded by a Read Request
+            # operation the read location defaults to 128
+            # (the sensor output location) and consecutive reads will
+            # therefore simply read the default 32 bytes
             # of the sensor data region.
             # Here we read only 6 bytes from 128 to 133
         try:
-            data = DEV_CTX.read_i2c_block_data(DEV_ADDRESS, 0x00, 6)
-            
+            data1 = DEV1_CTX.read_i2c_block_data(DEV1_ADDRESS, 0x00, 6)
+            data2 = DEV2_CTX.read_i2c_block_data(DEV2_ADDRESS, 0x00, 6)
 
-            frameindex = data[0] << 8 | data[1]
-            timestamp = data[2] << 8 | data[3]
-            value = (data[4] << 8 | data[5]) - 255
-        except IOError as e:
+
+            frameindex1 = data1[0] << 8 | data1[1]
+            timestamp1 = data1[2] << 8 | data1[3]
+            value1 = (data1[4] << 8 | data1[5]) - 255
+            frameindex2 = data2[0] << 8 | data2[1]
+            timestamp2 = data2[2] << 8 | data2[3]
+            value2 = (data2[4] << 8 | data2[5]) - 255
+        except IOError as e: # frequent
             continue
 
-        if frameindex == 0xffff and timestamp == 0xffff: #i2c read error
+        if frameindex1 == 0xffff and timestamp1 == 0xffff: #i2c read error
             continue
-        if value > 768: #out of bounds
+
+        if value1 > 768: #out of bounds
             continue
-        if OPT_VERBOSE: #debug, launch in terminal with -v
-            args = (frameindex, timestamp, value,ELAPSED_TIME / float(1000))
-            sys.stderr.write('frameindex=%i timestamp=%i value=%i sec=%.2f\n' % args)
-        out_file.write('%i, %i, %i, %.2f\n' % (frameindex, timestamp, value,
-            ELAPSED_TIME))
+
+        if frameindex2 == 0xffff and timestamp2 == 0xffff: #i2c read error
+            continue
+
+        if value2 > 768: #out of bounds
+            continue
+
+        if ZEROED:
+            value1 = value1 - BIAS1
+            value2 = value2 - BIAS2
+        else
+            BIAS1 = value1
+            BIAS2 = value2
+            value1 = 0
+            value2 = 0
+            ZEROED = True
+
+        out_file.write('%i, %i, %.2f\n' % (value1, value2, ELAPSED_TIME))
         time.sleep(INTERVAL / float(1000))
         ELAPSED_TIME = ELAPSED_TIME + INTERVAL
 
@@ -97,43 +98,14 @@ def start_thread(out_file, restart=False):
     global READ_THREAD
     global THREAD_IS_RUN
     global ELAPSED_TIME
-    global DEV_ADDRESS
-    if restart is True:
-        THREAD_IS_RUN = False
-        READ_THREAD.join()
 
-        if OPT_VERBOSE:
-            sys.stderr.write('resetting baseline...\n')
-        for i in range(0,2):
-            try:
-#                data = DEV_CTX.read_i2c_block_data(DEV_ADDRESS, 0, 6)
-#                data = [ 0x02, 41, 2, data[4], data[5], 0xff ]
-#                DEV_CTX.write_i2c_block_data(DEV_ADDRESS, 41, data)
-
-
-#write zero to baseline registers
-                data = [ 41, 2, 0, 0, 0xff ]
-                DEV_CTX.write_i2c_block_data(DEV_ADDRESS, 0x02, data)
-                time.sleep(.1)
-#read sensor data
-                data = DEV_CTX.read_i2c_block_data(DEV_ADDRESS, 0x00, 6)
-                msb = data[4]
-                lsb = data[5]
-#write new baseline registers
-                data = [ 41, 2, msb, lsb, 0xff ]
-                DEV_CTX.write_i2c_block_data(DEV_ADDRESS, 0x02, data)
-                time.sleep(.1)
-            except IOError as e:
-                if OPT_VERBOSE:
-                    sys.stderr.write('write: ' + str(e) + '\n')
-            finally:
-                break
-
-    ELAPSED_TIME = 0
-
-    THREAD_IS_RUN = True
-    READ_THREAD = threading.Thread(target=read_device, args=(out_file,))
-    READ_THREAD.start()
+    if READ_THREAD is None:
+        ELAPSED_TIME = 0
+        THREAD_IS_RUN = True
+        READ_THREAD = threading.Thread(target=read_device, args=(out_file,))
+        READ_THREAD.start()
+        return 'Started reading from sensor..'
+    return 'Sensor already running..'
 
 def stop_thread():
     global THREAD_IS_RUN
@@ -147,14 +119,11 @@ if __name__ == '__main__':
     out_file = open(args.file, 'w')
     OPT_VERBOSE = args.verbose
     try:
-        DEV_CTX = smbus.SMBus(DEV_BUS)
+        DEV1_CTX = smbus.SMBus(DEV1_BUS)
+        DEV2_CTX = smbus.SMBus(DEV2_BUS)
     except IOError as e:
         print e.message
         sys.exit(1)
-
-    if OPT_VERBOSE:
-        print 'I2C bus=%i address=0x%x' % (DEV_BUS, DEV_ADDRESS)
-        print 'samplerate=%ims' % INTERVAL
 
     try:
         start_thread(out_file)
