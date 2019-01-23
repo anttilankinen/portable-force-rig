@@ -1,0 +1,7 @@
+python
+- sklearn
+
+deb
+- python-smbus
+- i2c-tools
+- libatlas-base-dev
