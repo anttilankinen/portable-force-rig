@@ -17,17 +17,21 @@ def readDb():
     cursor = sqlite_conn.cursor()
 
     print('Reading from SQLite database..')
-    cursor.execute('SELECT * FROM data')
+    cursor.execute('SELECT * FROM database')
     data = cursor.fetchall()
-
-    if data:
-        print('Cleaning up and closing connection to SQLite database..')
-        cursor.execute('DELETE FROM data')
 
     sqlite_conn.commit()
     sqlite_conn.close()
-
     return data
+
+def cleanDb():
+
+    print('Cleaning SQLite database..')
+    sqlite_conn = sqlite3.connect('./data/readings.sqlite')
+    cursor = sqlite_conn.cursor()
+    cursor.execute('DELETE FROM database')
+    sqlite_conn.commit()
+    sqlite_conn.close()
 
 def upload(documents):
 
@@ -50,15 +54,23 @@ def main():
     print('Formatting data..')
     documents = []
     for row in db_data:
-        ant_size, row_data = row
+        date_time, ant_size, row_data = row
         data_array = json.loads(row_data)
-        new_document = {'antSize': ant_size, 'data': data_array}
+        new_document = {'dateTime': date_time, 'antSize': ant_size, 'data': data_array}
         documents.append(new_document)
 
     if documents:
-        upload(documents)
+        try:
+            upload(documents)
+            cleanDb()
+            print('Data upload complete!')
+
+        except Exception as error:
+            print(error.message)
+            raise
+
     else:
-        print('No documents to upload..')
+        print('Nothing to upload..')
 
 if __name__ == '__main__':
 
@@ -68,5 +80,9 @@ if __name__ == '__main__':
     def data_upload():
         main()
         return 'Data upload complete!'
+
+    @app.errorhandler(Exception)
+    def unhandled_exception(err):
+        return 'Error occured!', 500
 
     app.run(host='0.0.0.0', port=80)

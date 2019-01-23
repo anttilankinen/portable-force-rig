@@ -55,7 +55,6 @@ def read_device(out_file):
             ELAPSED_TIME))
 
         redis_client.publish('sensor-data', f'{value}')
-        print(value);
         time.sleep(INTERVAL / float(1000))
         ELAPSED_TIME = ELAPSED_TIME + INTERVAL
 

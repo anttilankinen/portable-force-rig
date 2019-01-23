@@ -6,7 +6,7 @@ def main():
     sqlite_conn = sqlite3.connect('readings.sqlite')
     cursor = sqlite_conn.cursor()
 
-    cursor.execute('SELECT * FROM data')
+    cursor.execute('SELECT * FROM database')
     data = cursor.fetchall()
     print(data)
 

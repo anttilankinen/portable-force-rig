@@ -56,7 +56,7 @@ export default class App extends Component {
     .then(res => res.json())
     .then(json => {
       const history = json.rows.map(row => ({
-        date: '12/10/2018',
+        date: row.date_time,
         antSize: row.ant_size,
         readings: row.readings
       }))
