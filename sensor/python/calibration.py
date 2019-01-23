@@ -32,20 +32,20 @@ def calibration_function(train_data, interval=(0, 1)):
     x = train_data[:,0]
     y = train_data[:,1]
     valid = np.where(x != -255)
-    x = x[valid]
-    y = y[valid]
+    x = x[valid].reshape(-1, 1)
+    y = y[valid].reshape(-1, 1)
 
     gpr = GaussianProcessRegressor(kernel=DotProduct(),
         random_state=0).fit(x, y)
     # for lookup table, get predicted means for fast processing
-    input = np.arange(769)
-    pred = gpr.predict(input, return_std=True)
+    input = np.arange(769).reshape(-1, 1)
+    y_pred, sigma = gpr.predict(input, return_std=True)
+    if np.max(y_pred) > interval[1]:
+        cutoff = int(np.where(y_pred.reshape(-1) > interval[1])[0][0])
+        sigms = sigma[:cutoff]
+    lookup_table = np.concatenate([input, y_pred], axis=1)
 
-    cutoff = np.where(pred.y_mean > 1)
-    stds = pred.y_std[:cutoff]
-    lookup_table = np.concatenate([input, pred.y_mean], axis=1)
-
-    return lookup_table, stds
+    return lookup_table, sigma
 
 
 
@@ -55,6 +55,7 @@ def read_device(weight, datapoints=200):
     global DEV1_CTX
     global ZEROED
     global BIAS1
+    global OPT_VERBOSE
     global train_data
     global data_collected
     timestamp = 1
@@ -107,7 +108,7 @@ def read_device(weight, datapoints=200):
         if ZEROED:
             value1 = value1 - BIAS1
 #            value2 = value2 - BIAS2
-        else
+        else:
             BIAS1 = value1
 #            BIAS2 = value2
             value1 = 0
@@ -115,6 +116,8 @@ def read_device(weight, datapoints=200):
             ZEROED = True
         time.sleep(INTERVAL / float(1000))
         data_collected = data_collected + 1
+        if OPT_VERBOSE:
+            print(value1)
         if data_collected == data_size:
             break
 
@@ -129,7 +132,9 @@ def start_thread(weight):
         READ_THREAD = threading.Thread(target=read_device,
             args=(weight,))
         READ_THREAD.start()
+        print('started running')
         return 'Started reading from sensor..'
+    print('already running')
     return 'Sensor already running..'
 
 def stop_thread():
@@ -138,20 +143,20 @@ def stop_thread():
 
     THREAD_IS_RUN = False
     READ_THREAD.join()
+    READ_THREAD = None
 
 if __name__ == '__main__':
     args = get_args()
-    out_file = open(args.file, 'w')
     OPT_VERBOSE = args.verbose
     try:
         DEV1_CTX = smbus.SMBus(DEV1_BUS)
         #DEV2_CTX = smbus.SMBus(DEV2_BUS)
     except IOError as e:
-        print e.message
+        print (e.message)
         sys.exit(1)
 
     input_string = 'Start calibration? [Y/n]'
-    while input(input_string).lower() !=  'n'
+    while input(input_string).lower() !=  'n':
         input_string = 'Continue calibration? [Y/n]'
         # first calibrate zero weight
         if ZEROED is False:
@@ -162,17 +167,15 @@ if __name__ == '__main__':
             weight = float(input('Enter weight (N)'))
 
         start_thread(weight)
-        time.sleep(5)
+        time.sleep(3)
         stop_thread()
         table, stds = calibration_function(train_data)
         max_std = np.max(stds) # least confidence in predicted value
         worst_force_pred = table[np.argmax(max_std), 1] # we are the least
         # confident about this particular force, so maybe we need to calibrate
         # around it
+        print(table)
+        print(stds)
+        print('Largest 95%% confidence interval is %.2f at %i N' %
+            (max_std, worst_force_pred))
 
-        print('Largest 95% confidence interval is %.2f at %i N' %
-            (max_std, worst_force_pred)
-
-
-    out_file.close()
-    sys.exit(0)

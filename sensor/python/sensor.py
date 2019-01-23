@@ -81,7 +81,7 @@ def read_device(out_file):
         if ZEROED:
             value1 = value1 - BIAS1
     #        value2 = value2 - BIAS2
-else:
+        else:
             BIAS1 = value1
     #        BIAS2 = value2
             value1 = 0
@@ -122,7 +122,7 @@ if __name__ == '__main__':
         DEV1_CTX = smbus.SMBus(DEV1_BUS)
         #DEV2_CTX = smbus.SMBus(DEV2_BUS)
     except IOError as e:
-        print e.message
+        print(e.message)
         sys.exit(1)
 
     try:
