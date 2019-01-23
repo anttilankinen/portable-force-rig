@@ -81,7 +81,7 @@ def read_device(out_file):
         if ZEROED:
             value1 = value1 - BIAS1
     #        value2 = value2 - BIAS2
-        else
+else:
             BIAS1 = value1
     #        BIAS2 = value2
             value1 = 0
