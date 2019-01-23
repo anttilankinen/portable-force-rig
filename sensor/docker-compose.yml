@@ -57,6 +57,7 @@ services:
       - 7004:80
     volumes:
       - ./service.sensor-controller:/usr/src/app
+    privileged: true
 
   service.data-upload:
     build: ./service.data-upload
