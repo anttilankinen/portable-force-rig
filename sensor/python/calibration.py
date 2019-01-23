@@ -5,13 +5,13 @@ import smbus
 import sys
 import time
 import numpy as np
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import DotProduct
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--file", default="lookup.txt")
-    parser.add_argument("--verbose", default=False)
+    parser.add_argument('--file', default='table.npy')
+    parser.add_argument('--verbose', default=False)
     return parser.parse_args()
 
 INTERVAL = 25 # in ms
@@ -25,31 +25,33 @@ BIAS1 = 0
 train_data = None
 data_collected = 0
 
-def calibration_function(train_data, interval=(0, 1)):
-    # compute calibration mapping using gaussian process regression
-    # yeah its beefy for the problem but it gives confidence intervals
-    # and can give suggestions about which sections to calibrate
+def calibration_function(train_data):
+    # compute calibration mapping using polynomial regression
+    
     x = train_data[:,0]
     y = train_data[:,1]
     valid = np.where(x != -255)
     x = x[valid].reshape(-1, 1)
+    # transform to polynomial features
+    poly = PolynomialFeatures(degree=3, include_bias=False)
+    x = poly.fit_transform(x)
+    
     y = y[valid].reshape(-1, 1)
 
-    gpr = GaussianProcessRegressor(kernel=DotProduct(),
-        random_state=0).fit(x, y)
-    # for lookup table, get predicted means for fast processing
+    lm = LinearRegression(fit_intercept=False).fit(x, y)
+    
+    # look-up table
     input = np.arange(769).reshape(-1, 1)
-    y_pred, sigma = gpr.predict(input, return_std=True)
-    if np.max(y_pred) > interval[1]:
-        cutoff = int(np.where(y_pred.reshape(-1) > interval[1])[0][0])
-        sigms = sigma[:cutoff]
+    poly_input = poly.fit_transform(input)
+    y_pred = lm.predict(poly_input)
+
     lookup_table = np.concatenate([input, y_pred], axis=1)
 
-    return lookup_table, sigma
+    return lookup_table
 
 
 
-def read_device(weight, datapoints=200):
+def read_device(weight, datapoints=100):
     global THREAD_IS_RUN
     global DEV1_ADDRESS
     global DEV1_CTX
@@ -70,7 +72,7 @@ def read_device(weight, datapoints=200):
     data_size = train_data.shape[0]
 
     while THREAD_IS_RUN:
-        value, frameindex = 0, 0
+        value1, frameindex1 = 0, 0
 
             # SingleTac manual section 2.4.3 I2C Read Operation:
             # Where a Read operation is not preceded by a Read Request
@@ -118,8 +120,6 @@ def read_device(weight, datapoints=200):
         data_collected = data_collected + 1
         if OPT_VERBOSE:
             print(value1)
-        if data_collected == data_size:
-            break
 
 def start_thread(weight):
     global READ_THREAD
@@ -132,10 +132,6 @@ def start_thread(weight):
         READ_THREAD = threading.Thread(target=read_device,
             args=(weight,))
         READ_THREAD.start()
-        print('started running')
-        return 'Started reading from sensor..'
-    print('already running')
-    return 'Sensor already running..'
 
 def stop_thread():
     global THREAD_IS_RUN
@@ -167,15 +163,8 @@ if __name__ == '__main__':
             weight = float(input('Enter weight (N)'))
 
         start_thread(weight)
-        time.sleep(3)
+        time.sleep(2)
         stop_thread()
-        table, stds = calibration_function(train_data)
-        max_std = np.max(stds) # least confidence in predicted value
-        worst_force_pred = table[np.argmax(max_std), 1] # we are the least
-        # confident about this particular force, so maybe we need to calibrate
-        # around it
-        print(table)
-        print(stds)
-        print('Largest 95%% confidence interval is %.2f at %i N' %
-            (max_std, worst_force_pred))
-
+        train_data = train_data[:data_collected, :]
+        table = calibration_function(train_data)
+    np.save(args.file, table)
