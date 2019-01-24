@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import socketIOClient from 'socket.io-client';
 import Table from './Table';
 
+import {Line} from 'react-chartjs-2';
+
 export default class App extends Component {
   state = {
     current: [],
@@ -63,7 +65,43 @@ export default class App extends Component {
   }
 
   render() {
+    const { response } = this.state;
+    const options = {
+      options: {
+      title: {
+        display: true,
+        text: 'Graph of'
+      }
+    }};
+    const data = {
+      labels:response,
+      datasets: [
+        {
+          label: 'Force',
+          fill: false,
+          lineTension: 0.1,
+          backgroundColor: 'rgba(75,192,192,0.4)',
+          borderColor: 'rgba(75,192,192,1)',
+          borderCapStyle: 'butt',
+          borderDash: [],
+          borderDashOffset: 0.0,
+          borderJoinStyle: 'miter',
+          pointBorderColor: 'rgba(75,192,192,1)',
+          pointBackgroundColor: '#fff',
+          pointBorderWidth: 1,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: 'rgba(75,192,192,1)',
+          pointHoverBorderColor: 'rgba(220,220,220,1)',
+          pointHoverBorderWidth: 2,
+          pointRadius: 1,
+          pointHitRadius: 10,
+          data:response,
+        }
+      ]
+    };
+    console.log(response);
     return (
+
       <div style={{ textAlign: 'center', padding: '100px' }}>
         <h1>Portable Force Rig Dashboard</h1>
         <h3>Incoming data: {this.state.current.join(', ')}</h3>
@@ -83,8 +121,12 @@ export default class App extends Component {
           <button className="ui black button" onClick={this.showHistory}>
             <i className="list alternate outline icon"></i>History
           </button>
+
+
         </div>
         {this.state.showTable && <Table tableData={this.state.saved}/>}
+
+        <div><Line data={data} options ={options}/></div>
       </div>
     );
   }
