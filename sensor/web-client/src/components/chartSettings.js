@@ -9,8 +9,7 @@ export const chartOptions = {
   scales: {
     yAxes: [{
       ticks: {
-        max: 10,
-        min: 0,
+        min: 0
       }
     }]
   }

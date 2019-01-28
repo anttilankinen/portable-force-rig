@@ -77,7 +77,7 @@ export default class App extends Component {
   render() {
     const { current, saved, showTable, started } = this.state;
 
-    chartData.labels = current;
+    chartData.labels = current.map((value, index) => index * 0.25);
     chartData.datasets[0].data = current;
 
     return (
