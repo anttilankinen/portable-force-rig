@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
+import { Line } from 'react-chartjs-2';
 import socketIOClient from 'socket.io-client';
 import Table from './Table';
+import { chartOptions, chartData } from './chartSettings';
 
 export default class App extends Component {
   state = {
@@ -73,11 +75,16 @@ export default class App extends Component {
   }
 
   render() {
-    const { saved, showTable, started } = this.state;
+    const { current, saved, showTable, started } = this.state;
+
+    chartData.labels = current;
+    chartData.datasets[0].data = current;
+
     return (
-      <div style={{ textAlign: 'center', padding: '100px' }}>
+      <div style={{ textAlign: 'center', padding: '50px' }}>
         <h1>Portable Force Rig Dashboard</h1>
-        <h3>Incoming data: {this.state.current.join(', ')}</h3>
+        {/* <h3>Incoming data: {this.state.current.join(', ')}</h3> */}
+        <div><Line data={chartData} options={chartOptions} height={350}/></div>
         <div style={{ marginTop: '20px '}}>
           {!started &&
             <button className="ui green button" onClick={this.startRecording}>

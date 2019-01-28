@@ -23,7 +23,7 @@ const TableBody = props => {
         <td>{row.date}</td>
         <td>{row.antSize}</td>
         <td>{row.readings}</td>
-        <td>{}</td>
+        <td>-</td>
         <td>
           <button className="ui violet button">
             <i className="info circle icon"></i>View
