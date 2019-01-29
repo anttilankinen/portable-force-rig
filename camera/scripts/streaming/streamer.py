@@ -22,6 +22,7 @@ PAGE="""\
 class StreamingOutput(object):
     def __init__(self):
         self.frame = None
+        # seconds = the duration of the memory held in the stream memory
         self.buffer = picamera.PiCameraCircularIO(camera, seconds=20)
         self.condition = Condition()
 
