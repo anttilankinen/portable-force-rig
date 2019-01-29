@@ -2,3 +2,11 @@ body {
   height: 100vh;
   width: 100vw;
 }
+
+a {
+  color: black;
+}
+
+a:hover {
+  color :pink;
+}
