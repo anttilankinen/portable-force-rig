@@ -108,10 +108,10 @@ export default class History extends Component {
             <i className="upload icon"></i>Upload
           </button>
 
-          <Link to="/history" className="ui black button" onClick={this.showHistory}>
+          {/*<Link to="/history" className="ui black button" onClick={this.showHistory}>
             <i className="list alternate outline icon"></i>History
           </Link>
-
+          */}
         </div>
         {showTable && <Table tableData={saved}/>}
       </div>
