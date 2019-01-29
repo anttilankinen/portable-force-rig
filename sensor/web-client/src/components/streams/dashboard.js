@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Line } from 'react-chartjs-2';
 import socketIOClient from 'socket.io-client';
-import { Link } from 'react-router-dom'
+import { BrowserRouter, Route , Link } from 'react-router-dom'
 
 import Table from '../Table';
 import { chartOptions, chartData } from '../chartSettings';
@@ -86,10 +86,7 @@ export default class Dashboard extends Component {
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
         {/* <h3>Incoming data: {this.state.current.join(', ')}</h3> */}
-          <div>
-            <Line data={chartData} options={chartOptions} height={350}/>
-          </div>
-
+        <div><Line data={chartData} options={chartOptions} height={350}/></div>
         <div style={{ marginTop: '20px '}}>
           {!started &&
             <button className="ui green button" onClick={this.startRecording}>
@@ -110,11 +107,13 @@ export default class Dashboard extends Component {
           <button className="ui brown button" onClick={this.uploadData}>
             <i className="upload icon"></i>Upload
           </button>
+
           {/*
-          <Link to="/history" className="ui black button" onClick={this.showHistory}>
-            <i className="list alternate outline icon"></i>History
-          </Link>
-           */}
+            <Link to="/history" className="ui black button" onClick={this.showHistory}>
+              <i className="list alternate outline icon"></i>History
+            </Link>
+            */}
+
         </div>
         {showTable && <Table tableData={saved}/>}
       </div>
