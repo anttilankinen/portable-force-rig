@@ -77,8 +77,9 @@ export default class App extends Component {
   render() {
     const { current, saved, showTable, started } = this.state;
 
-    chartData.labels = current.map((value, index) => index * 0.25);
-    chartData.datasets[0].data = current;
+    let dataToDisplay = current.slice(-20);
+    chartData.labels = dataToDisplay.map((value, index) => (index * 0.025).toFixed(3));
+    chartData.datasets[0].data = dataToDisplay;
 
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
