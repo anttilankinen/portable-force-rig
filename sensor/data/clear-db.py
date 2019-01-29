@@ -7,7 +7,7 @@ def main():
     cursor = sqlite_conn.cursor()
 
     print('Clearing SQLite database..')
-    cursor.execute('DELETE FROM data')
+    cursor.execute('DELETE FROM database')
 
     sqlite_conn.commit()
     sqlite_conn.close()
