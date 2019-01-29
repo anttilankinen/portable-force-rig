@@ -85,8 +85,8 @@ export default class Dashboard extends Component {
 
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
-        <h1>Portable Force Rig Dashboard</h1>
-        {/* <h3>Incoming data: {this.state.current.join(', ')}</h3> */}
+      <Link to ="/"><h1>Portable Force Rig Dashboard</h1></Link>
+    {/* <h3>Incoming data: {this.state.current.join(', ')}</h3> */}
         <div><Line data={chartData} options={chartOptions} height={350}/></div>
         <div style={{ marginTop: '20px '}}>
           {!started &&
@@ -108,7 +108,7 @@ export default class Dashboard extends Component {
           <button className="ui brown button" onClick={this.uploadData}>
             <i className="upload icon"></i>Upload
           </button>
-        
+
           <Link to="/history" className="ui black button" onClick={this.showHistory}>
             <i className="list alternate outline icon"></i>History
           </Link>
