@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Line } from 'react-chartjs-2';
 import socketIOClient from 'socket.io-client';
-import { BrowserRouter, Route , Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import Table from '../Table';
 import { chartOptions, chartData } from '../chartSettings';
@@ -85,7 +85,6 @@ export default class History extends Component {
 
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
-        <Link to ="/"><h1>Portable Force Rig Dashboard</h1></Link>
         {/* <h3>Incoming data: {this.state.current.join(', ')}</h3> */}
         <div><Line data={chartData} options={chartOptions} height={350}/></div>
         <div style={{ marginTop: '20px '}}>
