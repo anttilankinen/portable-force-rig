@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import threading
 import argparse
-import smbus
+import smbus2
 import sys
 import time
 import numpy as np
@@ -10,8 +10,11 @@ from sklearn.preprocessing import PolynomialFeatures
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--file', default='table.npy')
-    parser.add_argument('--verbose', default=False)
+    # filename of table, required as can mix between buses
+    parser.add_argument('-f', '--file', required=True) 
+    parser.add_argument('-v', '--verbose', default=False)
+    # sensor bus
+    parser.add_argument('-s', '--sensor', required=True)
     return parser.parse_args()
 
 INTERVAL = 25 # in ms
@@ -43,9 +46,9 @@ def calibration_function(train_data):
     # look-up table
     input = np.arange(769).reshape(-1, 1)
     poly_input = poly.fit_transform(input)
-    y_pred = lm.predict(poly_input)
-
-    lookup_table = np.concatenate([input, y_pred], axis=1)
+    # look-up table is just an array which can be used just by the index as
+    # input is integer-valued
+    lookup_table = lm.predict(poly_input)
 
     return lookup_table
 
@@ -166,5 +169,7 @@ if __name__ == '__main__':
         time.sleep(2)
         stop_thread()
         train_data = train_data[:data_collected, :]
-        table = calibration_function(train_data)
+    print('Computing look-up table')
+    table = calibration_function(train_data)
     np.save(args.file, table)
+    print('Look-up table saved as "%s"' % (args.file))
