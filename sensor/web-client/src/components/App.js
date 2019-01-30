@@ -1,19 +1,19 @@
 import React, { Component } from 'react';
 import { BrowserRouter, Route } from 'react-router-dom'
 
-import Dashboard from './streams/dashboard';
-import History from './streams/history';
-import Header from './header.js';
+import Dashboard from './streams/Dashboard';
+import History from './streams/History';
+import Header from './Header';
 
 class App extends Component {
   render(){
     return (
-      <div className = "ui container">
+      <div className="ui container">
         <BrowserRouter>
           <div>
             <Header/>
-            <Route path ="/" exact component = {Dashboard} />
-            <Route path ="/history" exact component = {History} />
+            <Route path="/" exact component={Dashboard} />
+            <Route path="/history" exact component={History} />
           </div>
         </BrowserRouter>
       </div>

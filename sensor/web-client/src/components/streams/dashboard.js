@@ -1,17 +1,11 @@
 import React, { Component } from 'react';
 import { Line } from 'react-chartjs-2';
 import socketIOClient from 'socket.io-client';
-import { BrowserRouter, Route , Link } from 'react-router-dom'
-
-import Table from '../Table';
 import { chartOptions, chartData } from '../chartSettings';
-
 
 export default class Dashboard extends Component {
   state = {
     current: [],
-    saved: [],
-    showTable: false,
     started: false
   }
 
@@ -56,19 +50,6 @@ export default class Dashboard extends Component {
     .then(string => console.log(string));
   }
 
-  showHistory = () => {
-    fetch('/api/rpi/data')
-    .then(res => res.json())
-    .then(json => {
-      const history = json.rows.map(row => ({
-        date: '12/10/2018',
-        antSize: row.ant_size,
-        readings: row.readings
-      }))
-      this.setState({ saved: history, showTable: !this.state.showTable });
-    });
-  }
-
   componentDidMount() {
     const socket = socketIOClient('http://192.168.99.100:7002');
     socket.on('connected', message => console.log(message));
@@ -78,14 +59,13 @@ export default class Dashboard extends Component {
   }
 
   render() {
-    const { current, saved, showTable, started } = this.state;
-
-    chartData.labels = current.map((value, index) => index * 0.25);
+    const { current, started } = this.state;
+    chartData.labels = current.map((value, index) => (index * 0.025).toFixed(3));
     chartData.datasets[0].data = current;
 
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
-        {/* <h3>Incoming data: {this.state.current.join(', ')}</h3> */}
+      <div style={{ textAlign: 'center', padding: '20px' }}>
+        <h4>Status</h4>
         <div><Line data={chartData} options={chartOptions} height={350}/></div>
         <div style={{ marginTop: '20px '}}>
           {!started &&
@@ -107,15 +87,7 @@ export default class Dashboard extends Component {
           <button className="ui brown button" onClick={this.uploadData}>
             <i className="upload icon"></i>Upload
           </button>
-
-          {/*
-            <Link to="/history" className="ui black button" onClick={this.showHistory}>
-              <i className="list alternate outline icon"></i>History
-            </Link>
-            */}
-
         </div>
-        {showTable && <Table tableData={saved}/>}
       </div>
     );
   }
