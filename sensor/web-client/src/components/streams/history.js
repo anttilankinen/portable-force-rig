@@ -15,47 +15,6 @@ export default class History extends Component {
     started: false
   }
 
-  startRecording = () => {
-    this.setState({ started: true });
-    fetch('/api/sensor-controller/start')
-    .then(res => res.text())
-    .then(string => console.log(string));
-  }
-
-  stopRecording = () => {
-    this.setState({ started: false });
-    fetch('/api/sensor-controller/stop')
-    .then(res => res.text())
-    .then(string => console.log(string));
-  }
-
-  saveData = () => {
-    const { current } = this.state;
-    if (current && current.length) {
-      const JSONdata = JSON.stringify({ data: current });
-
-      fetch('/api/rpi/data', {
-        method: 'post',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSONdata,
-      }).then(res => res.text())
-      .then(string => {
-        console.log(string);
-        this.setState({ current: [] });
-      });
-    }
-  }
-
-  clearData = () => {
-    this.setState({ current: [] });
-  }
-
-  uploadData = () => {
-    fetch('/api/data-upload/')
-    .then(res => res.text())
-    .then(string => console.log(string));
-  }
-
   showHistory = () => {
     fetch('/api/rpi/data')
     .then(res => res.json())
