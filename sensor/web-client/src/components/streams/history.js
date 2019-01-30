@@ -87,32 +87,7 @@ export default class History extends Component {
       <div style={{ textAlign: 'center', padding: '50px' }}>
         {/* <h3>Incoming data: {this.state.current.join(', ')}</h3> */}
         <div><Line data={chartData} options={chartOptions} height={350}/></div>
-        <div style={{ marginTop: '20px '}}>
-          {!started &&
-            <button className="ui green button" onClick={this.startRecording}>
-              <i className="play icon"></i>Start
-            </button>
-          }
-          {started &&
-            <button className="ui red button" onClick={this.stopRecording}>
-              <i className="stop icon"></i>Stop
-            </button>
-          }
-          <button className="ui yellow button" onClick={this.clearData} disabled={started}>
-            <i className="trash icon"></i>Clear
-          </button>
-          <button className="ui blue button" onClick={this.saveData} disabled={started}>
-            <i className="download icon"></i>Save
-          </button>
-          <button className="ui brown button" onClick={this.uploadData}>
-            <i className="upload icon"></i>Upload
-          </button>
 
-          {/*<Link to="/history" className="ui black button" onClick={this.showHistory}>
-            <i className="list alternate outline icon"></i>History
-          </Link>
-          */}
-        </div>
         {showTable && <Table tableData={saved}/>}
       </div>
     );
