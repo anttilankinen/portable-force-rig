@@ -2,7 +2,7 @@
   "name": "web-client",
   "version": "0.1.0",
   "homepage": "./",
-  "proxy": "http://192.168.99.100:7001",
+  "proxy": "http://localhost:7001",
   "private": true,
   "dependencies": {
     "chart.js": "^2.7.3",

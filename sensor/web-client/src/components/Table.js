@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 const TableHeader = props => {
   return (
@@ -25,9 +26,9 @@ const TableBody = props => {
         <td>{row.readings}</td>
         <td>{typeof(row.readings)}</td>
         <td>
-          <button className="ui violet button">
-            <i className="info circle icon"></i>View
-          </button>
+          <Link to={`/history/${row.date}`} className="ui violet button">
+            <i Link="info circle icon"></i>View
+          </Link>
         </td>
       </tr>
     );

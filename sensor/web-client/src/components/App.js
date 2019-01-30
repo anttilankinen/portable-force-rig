@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { BrowserRouter, Route } from 'react-router-dom'
 
-import Dashboard from './streams/Dashboard';
-import History from './streams/History';
-import Header from './Header';
+import Dashboard from './streams/dashboard.js';
+import History from './streams/history.js';
+// import Views from './streams/views.js';
+import Header from './header.js';
 
 class App extends Component {
   render(){
@@ -14,6 +15,7 @@ class App extends Component {
             <Header/>
             <Route path="/" exact component={Dashboard} />
             <Route path="/history" exact component={History} />
+            <Route path="/history/:rowdate"  component={Views}/>
           </div>
         </BrowserRouter>
       </div>
@@ -22,3 +24,7 @@ class App extends Component {
 }
 
 export default App;
+
+const Views = ({ match }) => (
+  <div>{match.params.rowdate}</div>
+)
