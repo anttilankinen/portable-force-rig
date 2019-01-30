@@ -5,7 +5,6 @@ import Dashboard from './streams/dashboard';
 import History from './streams/history';
 import Header from './header.js';
 
-
 class App extends Component {
   render(){
     return (
@@ -20,8 +19,6 @@ class App extends Component {
       </div>
     );
   }
-
-
 }
 
 export default App;
