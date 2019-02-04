@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import threading
 import argparse
 import smbus2
@@ -11,7 +10,7 @@ from sklearn.preprocessing import PolynomialFeatures
 def get_args():
     parser = argparse.ArgumentParser()
     # filename of table, required as can mix between buses
-    parser.add_argument('-f', '--file', required=True) 
+    parser.add_argument('-f', '--file', required=True)
     parser.add_argument('-v', '--verbose', default=False)
     # sensor bus
     parser.add_argument('-s', '--sensor', required=True)
@@ -30,7 +29,7 @@ data_collected = 0
 
 def calibration_function(train_data):
     # compute calibration mapping using polynomial regression
-    
+
     x = train_data[:,0]
     y = train_data[:,1]
     valid = np.where(x != -255)
@@ -38,11 +37,11 @@ def calibration_function(train_data):
     # transform to polynomial features
     poly = PolynomialFeatures(degree=3, include_bias=False)
     x = poly.fit_transform(x)
-    
+
     y = y[valid].reshape(-1, 1)
 
     lm = LinearRegression(fit_intercept=False).fit(x, y)
-    
+
     # look-up table
     input = np.arange(769).reshape(-1, 1)
     poly_input = poly.fit_transform(input)
