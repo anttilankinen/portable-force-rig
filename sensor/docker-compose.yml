@@ -57,6 +57,9 @@ services:
       - 7004:80
     volumes:
       - ./service.sensor-controller:/usr/src/app
+      - type: bind
+        source: ./service.calibration/lookup.npy
+        target: /usr/src/app/lookup.npy
     privileged: true
 
   service.data-upload:

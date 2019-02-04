@@ -35,7 +35,7 @@ def read_devices():
     timestamp = 1
     previous_value1 = 0
     previous_value2 = 0
-    
+
     while THREAD_IS_RUN:
         value, frameindex = 0, 0
         try:
@@ -109,9 +109,7 @@ def stop():
 
 if __name__ == '__main__':
     # open file to write data
-    LOOKUP_TABLE = None
-    if sys.argc > 1:
-        LOOKUP_TABLE = np.load(sys.argv[1])
+    LOOKUP_TABLE = np.load('lookup.npy')
     OUT_FILE= open(int(time.time()) + '.txt', 'w')
     # try to connect to sensor
     try:

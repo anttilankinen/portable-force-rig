@@ -52,6 +52,9 @@ def read_device(weight, datapoints=100):
     global train_data
     global data_collected
     timestamp = 1
+    # clear up previously unused preallocated space from training data
+    train_data = train_data[data_collected - 1, :]
+
     # preallocated space for training data
     data_space = np.concatenate([np.zeros([datapoints,1]),
         weight * np.ones([datapoints, 1])], axis=1)
@@ -87,19 +90,21 @@ def read_device(weight, datapoints=100):
             value1 = 0
             ZEROED = True
 
-        time.sleep(INTERVAL / float(1000))
+        train_data[data_collected, 0] = value1
         data_collected = data_collected + 1
+        time.sleep(INTERVAL / float(1000))
 
-@app.route('/calibrate', methods=['POST'])
+@app.route('/begin', methods=['POST'])
 def calibrate():
     global READ_THREAD
     global THREAD_IS_RUN
     global ELAPSED_TIME
+    global train_data
 
     data = request.get_json()
-    # if calibration not started
+    # if sensor not started
     if READ_THREAD is None:
-        print('Calibration started..')
+        print('Calibrating..')
         # start reading from sensor
         ELAPSED_TIME = 0
         THREAD_IS_RUN = True
@@ -114,17 +119,27 @@ def calibrate():
 
         # calibrate
         train_data = train_data[:data_collected, :]
-        return 'Calibration done!'
+        return 'Ready for next weight..'
     return 'Calibration already started..'
 
-@app.route('/complete')
+@app.route('/end')
 def create_lookup():
+    global ZEROED
+    global BIAS1
+    global train_data
+    global data_collected
+
     print('Computing look-up table..')
     table = calibration_function(train_data)
     np.save('./lookup.pny', table)
-    # TODO: reset initial state
     print('Look-up table created!')
+
+    ZEROED = False
+    BIAS1 = 0
+    train_data = None
+    data_collected = 0
     print('Calibration done!')
+
     return 'Calibration done!'
 
 if __name__ == '__main__':
