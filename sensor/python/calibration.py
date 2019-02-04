@@ -64,6 +64,9 @@ def read_device(weight, datapoints=100):
     global train_data
     global data_collected
     timestamp = 1
+    # clear up previously unused preallocated space from training data
+    train_data = train_data[data_collected - 1, :]
+
     # preallocated space for training data
     data_space = np.concatenate([np.zeros([datapoints,1]),
         weight * np.ones([datapoints, 1])], axis=1)
@@ -71,8 +74,6 @@ def read_device(weight, datapoints=100):
         train_data = data_space
     else:
         train_data = np.concatenate([train_data, data_space], axis=0)
-
-    data_size = train_data.shape[0]
 
     while THREAD_IS_RUN:
         value1, frameindex1 = 0, 0
@@ -119,8 +120,10 @@ def read_device(weight, datapoints=100):
             value1 = 0
 #            value2 = 0
             ZEROED = True
-        time.sleep(INTERVAL / float(1000))
+        train_data[data_collected, 0] = value1
         data_collected = data_collected + 1
+        time.sleep(INTERVAL / float(1000))
+
         if OPT_VERBOSE:
             print(value1)
 
