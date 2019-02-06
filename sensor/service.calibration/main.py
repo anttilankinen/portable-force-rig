@@ -52,8 +52,8 @@ def read_device(weight, datapoints=100):
     global train_data
     global data_collected
     timestamp = 1
+
     # clear up previously unused preallocated space from training data
-    train_data = train_data[data_collected - 1, :]
 
     # preallocated space for training data
     data_space = np.concatenate([np.zeros([datapoints,1]),
@@ -61,6 +61,11 @@ def read_device(weight, datapoints=100):
     if train_data is None:
         train_data = data_space
     else:
+        print(train_data.shape)
+        print(data_space.shape)
+        train_data = train_data[:data_collected, :]
+        print(train_data.shape)
+        print(data_collected)
         train_data = np.concatenate([train_data, data_space], axis=0)
 
     data_size = train_data.shape[0]
@@ -113,6 +118,7 @@ def calibrate():
 
         # stop reading from sensor
         time.sleep(2)
+        print('Finishing..')
         THREAD_IS_RUN = False
         READ_THREAD.join()
         READ_THREAD = None
@@ -131,7 +137,7 @@ def create_lookup():
 
     print('Computing look-up table..')
     table = calibration_function(train_data)
-    np.save('./lookup.pny', table)
+    np.save('./lookup', table)
     print('Look-up table created!')
 
     ZEROED = False
@@ -144,10 +150,10 @@ def create_lookup():
 
 if __name__ == '__main__':
     try:
-        DEV1_CTX = smbus.SMBus(DEV1_BUS)
+        DEV1_CTX = smbus2.SMBus(DEV1_BUS)
 
     except IOError as e:
         print (e.message)
         sys.exit(1)
 
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=8000)
