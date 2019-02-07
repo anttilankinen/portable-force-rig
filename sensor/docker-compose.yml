@@ -62,13 +62,24 @@ services:
         target: /usr/src/app/lookup.npy
     privileged: true
 
+  service.calibration:
+    build: ./service.calibration
+    env_file: ./.env
+    image: portable-force-rig/service.calibration:1.0
+    container_name: service.calibration
+    ports:
+      - 7005:80
+    volumes:
+      - ./service.calibration:/usr/src/app
+    privileged: true
+
   service.data-upload:
     build: ./service.data-upload
     env_file: ./.env
     image: portable-force-rig/service.data-upload:1.0
     container_name: service.data-upload
     ports:
-      - 7005:80
+      - 7006:80
     volumes:
       - ./service.data-upload:/usr/src/app
       - type: bind

@@ -11,6 +11,12 @@ apis:
     upstream_url: http://service.sensor-controller
     allow_cross_origin: true
 
+  service.calibration:
+    name: Calibration Service
+    prefix: api/calibration
+    upstream_url: http://service.calibration
+    allow_cross_origin: true
+    
   service.data-upload:
     name: Data Upload Service
     prefix: api/data-upload

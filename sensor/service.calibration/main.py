@@ -61,11 +61,7 @@ def read_device(weight, datapoints=100):
     if train_data is None:
         train_data = data_space
     else:
-        print(train_data.shape)
-        print(data_space.shape)
         train_data = train_data[:data_collected, :]
-        print(train_data.shape)
-        print(data_collected)
         train_data = np.concatenate([train_data, data_space], axis=0)
 
     data_size = train_data.shape[0]
@@ -153,7 +149,7 @@ if __name__ == '__main__':
         DEV1_CTX = smbus2.SMBus(DEV1_BUS)
 
     except IOError as e:
-        print (e.message)
+        print(e.message)
         sys.exit(1)
 
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=80)
