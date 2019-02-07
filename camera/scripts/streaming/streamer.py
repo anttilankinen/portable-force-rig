@@ -5,25 +5,11 @@ import socketserver
 from threading import Condition
 from http import server
 
-#Test page
-PAGE="""\
-<html>
-    <head>
-        <title>Demo</title>
-    </head>
-    <body>
-        <h1> Streaming Demo</h1>
-        <img src="stream.mjpg" width="640" height="480" />
-        <button> Record </button>
-    </body>
-</html>
-"""
-
 class StreamingOutput(object):
     def __init__(self):
         self.frame = None
         # seconds = the duration of the memory held in the stream memory
-        self.buffer = picamera.PiCameraCircularIO(camera, seconds=20)
+        self.buffer = picamera.PiCameraCircularIO(camera, seconds=35)
         self.condition = Condition()
 
     def write(self, buf):
@@ -40,18 +26,21 @@ class StreamingOutput(object):
 #Server paths and error checks
 class StreamingHandler(server.BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path == '/':
-            self.send_response(301)
-            self.send_header('Location', '/index.html')
-            self.end_headers()
-        elif self.path == '/index.html':
-            content = PAGE.encode('utf-8')
-            self.send_response(200)
-            self.send_header('Content-Type', 'text/html')
-            self.send_header('Content-Length', len(content))
-            self.end_headers()
-            self.wfile.write(content)
-        elif self.path == '/stream.mjpg':
+        #EXTRA CODE (NOT NEEDED)
+        # if self.path == '/':
+        #     self.send_response(301)
+        #     self.send_header('Location', '/index.html')
+        #     self.end_headers()
+        # elif self.path == '/index.html':
+        #     content = PAGE.encode('utf-8')
+        #     self.send_response(200)
+        #     self.send_header('Content-Type', 'text/html')
+        #     self.send_header('Content-Length', len(content))
+        #     self.end_headers()
+        #     self.wfile.write(content)
+
+        #Setting the path of the stream
+        if self.path == '/stream.mjpg':
             self.send_response(200)
             self.send_header('Age', 0)
             self.send_header('Cache-Control', 'no-cache, private')
@@ -59,6 +48,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             self.send_header('Content-Type', 'multipart/x-mixed-replace; boundary=FRAME')
             self.end_headers()
             try:
+                print('Stream successfully started')
                 while True:
                     with output.condition:
                         output.condition.wait()
@@ -74,6 +64,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                     'Removed streaming client %s: %s',
                     self.client_address, str(e))
         else:
+            print('Stream failed to start')
             self.send_error(404)
             self.end_headers()
 
