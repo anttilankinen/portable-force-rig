@@ -62,6 +62,7 @@ export default class Calibrate extends Component {
             </button>
           }
           <Input
+            type="number"
             disabled={!count}
             loading={!ready}
             onChange={this.handleChange}
