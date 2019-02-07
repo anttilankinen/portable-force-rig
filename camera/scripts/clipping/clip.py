@@ -19,3 +19,11 @@ try:
             stream.copy_to('motion.h264')
 finally:
     camera.stop_recording()
+
+#Need to find a way to get the state from the front end (using routes)
+
+#Then Use if loops to check the state, then
+#       clear the stream
+#       record (run the camera for 30s)
+#       clip the stream
+#       clear the stream - repeat until the state changes.
