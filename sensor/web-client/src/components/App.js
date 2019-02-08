@@ -15,7 +15,9 @@ class App extends Component {
             <Header/>
             <Route path="/" exact component={Dashboard} />
             <Route path="/history" exact component={History} />
-            <Route path="/history/:rowdate"  component={Views}/>
+            <Route path="/history/:rowdate"  render={({ match }) => (
+                <Views view={views.find(v => v.row.date === match.params.rowdate)}/>
+              )}/>
           </div>
         </BrowserRouter>
       </div>
@@ -25,6 +27,6 @@ class App extends Component {
 
 export default App;
 
-const Views = ({ match }) => (
+const Views = ({ view }) => (
   <div>{match.params.rowdate}</div>
 )
