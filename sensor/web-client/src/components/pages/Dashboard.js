@@ -6,28 +6,32 @@ import { chartOptions, chartData } from '../chartSettings';
 export default class Dashboard extends Component {
   state = {
     current: [],
-    started: false
+    started: false,
+    status: 'Sensor ready!'
   }
 
   startRecording = () => {
-    this.setState({ started: true });
     fetch('/api/sensor-controller/start')
     .then(res => res.text())
-    .then(string => console.log(string));
+    .then(string => {
+      console.log(string);
+      this.setState({ started: true, status: 'Reading from sensor..' });
+    });
   }
 
   stopRecording = () => {
-    this.setState({ started: false });
     fetch('/api/sensor-controller/stop')
     .then(res => res.text())
-    .then(string => console.log(string));
+    .then(string => {
+      console.log(string);
+      this.setState({ started: false, status: 'Sensor ready!' });
+    });
   }
 
   saveData = () => {
     const { current } = this.state;
     if (current && current.length) {
       const JSONdata = JSON.stringify({ data: current });
-
       fetch('/api/rpi/data', {
         method: 'post',
         headers: { 'Content-Type': 'application/json' },
@@ -35,7 +39,7 @@ export default class Dashboard extends Component {
       }).then(res => res.text())
       .then(string => {
         console.log(string);
-        this.setState({ current: [] });
+        this.setState({ current: [], status: 'Recording successfully saved' });
       });
     }
   }
@@ -47,7 +51,10 @@ export default class Dashboard extends Component {
   uploadData = () => {
     fetch('/api/data-upload/')
     .then(res => res.text())
-    .then(string => console.log(string));
+    .then(string => {
+      console.log(string);
+      this.setState({ status: 'Data uploaded successfully!' });
+    });
   }
 
   componentDidMount() {
@@ -59,13 +66,13 @@ export default class Dashboard extends Component {
   }
 
   render() {
-    const { current, started } = this.state;
+    const { current, started, status } = this.state;
     chartData.labels = current.map((value, index) => (index * 0.025).toFixed(3));
     chartData.datasets[0].data = current;
 
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
-        <h4>Status</h4>
+        <h4>{status}</h4>
         <div><Line data={chartData} options={chartOptions} height={350}/></div>
         <div style={{ margin: '20px 0 40px 0'}}>
           {!started &&
@@ -88,7 +95,7 @@ export default class Dashboard extends Component {
             <i className="upload icon"></i>Upload
           </button>
         </div>
-        <img src="http://localhost:8000/stream.mjpg" alt="Video stream" width="640" height="480" />
+        <img src="http://localhost:8000/stream.mjpg" alt="Video stream currently unavailable" width="640" height="480" />
       </div>
     );
   }

@@ -3,6 +3,7 @@ import { BrowserRouter, Route } from 'react-router-dom';
 
 import Dashboard from './pages/Dashboard';
 import History from './pages/History';
+import Calibrate from './pages/Calibrate.js'
 import Header from './Header';
 
 class App extends Component {
@@ -14,6 +15,7 @@ class App extends Component {
             <Header/>
             <Route path="/" exact component={Dashboard} />
             <Route path="/history" exact component={History} />
+            <Route path="/calibrate" exact component={Calibrate} />
           </div>
         </BrowserRouter>
       </div>
