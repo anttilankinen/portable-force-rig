@@ -6,7 +6,10 @@ import threading
 from flask import Flask
 from multiprocessing import Process
 
+<<<<<<< HEAD
 # REDIS_HOST = os.getenv('DOCKER_HOST')
+=======
+>>>>>>> 68b010616e217a9297fd1c723aec86ee47e06bef
 REDIS_PORT = int(os.getenv('REDIS_PORT'))
 
 app = Flask(__name__)

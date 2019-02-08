@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Line } from 'react-chartjs-2';
 import socketIOClient from 'socket.io-client';
 import { chartOptions, chartData } from '../chartSettings';
+import Calibrate from './Calibrate';
 
 export default class Dashboard extends Component {
   state = {
@@ -88,6 +89,7 @@ export default class Dashboard extends Component {
             <i className="upload icon"></i>Upload
           </button>
         </div>
+        <Calibrate />
       </div>
     );
   }
