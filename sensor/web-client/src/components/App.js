@@ -3,8 +3,11 @@ import { BrowserRouter, Route } from 'react-router-dom'
 
 import Dashboard from './streams/dashboard.js';
 import History from './streams/history.js';
+import Calibrate from './streams/Calibrate.js'
+
 // import Views from './streams/views.js';
 import Header from './header.js';
+
 
 class App extends Component {
   render(){
@@ -16,8 +19,9 @@ class App extends Component {
             <Route path="/" exact component={Dashboard} />
             <Route path="/history" exact component={History} />
             <Route path="/history/:rowdate"  render={({ match }) => (
-                <Views view={views.find(v => v.row.date === match.params.rowdate)}/>
+                {/*<Views view={views.find(v => v.row.date === match.params.rowdate)}/>*/}
               )}/>
+            <Route path="/calibrate" exact component={Calibrate} />
           </div>
         </BrowserRouter>
       </div>
@@ -26,7 +30,9 @@ class App extends Component {
 }
 
 export default App;
+{/*
+  const Views = ({ view }) => (
+    <div>{match.params.rowdate}</div>
+  )
 
-const Views = ({ view }) => (
-  <div>{match.params.rowdate}</div>
-)
+  */}
