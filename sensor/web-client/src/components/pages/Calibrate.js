@@ -16,25 +16,32 @@ export default class Calibrate extends Component {
 
   run = () => {
     const { count, weight } = this.state;
+
     this.setState({ ready: false, status: 'Calibrating..' });
     let value = count ? (weight ? weight : 0) : 0;
-    console.log(value);
-    fetch('localhost:7006/begin')
-    // Endpoint /calibrate/begin with { weight: value }
-    setTimeout(() => {
+
+    fetch('http://localhost:7006/begin', {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: { weight: value },
+    }).then(res => res.text())
+    .then(string => {
       this.setState({
         ready: true,
         count: count + 1,
         weight: '',
         status: 'Run calibration against a known weight'
       });
-    }, 2000);
+    });
   }
 
   end = () => {
-    // Endpoint /calibrate/end
-    this.setState({ started: false, count: 0, status: 'Calibration done!' });
-    setTimeout(() => this.setState({ status: '' }), 2000);
+    fetch('http://localhost:7006/end')
+    .then(res => res.text())
+    .then(string => {
+      console.log(string);
+      this.setState({ started: false, count: 0, status: 'Calibration done!' });
+    });
   }
 
   handleChange = (event, data) => {
