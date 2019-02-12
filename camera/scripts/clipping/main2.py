@@ -1,9 +1,11 @@
-#For Threading
+#From main.py
 import os
 import time
 import threading
+from flask import Flask
+import sys
 
-#For streaming
+#from streamer.py
 import io
 import picamera
 import logging
@@ -11,11 +13,66 @@ import socketserver
 from threading import Condition
 from http import server
 
-#Global variables
+app = Flask(__name__)
+
 ELAPSED_TIME = 0
 READ_THREAD = None
 THREAD_IS_RUN = False
 INTERV = 35
+
+#Clipping handler
+
+#Clipping function
+def clip_buffer():
+    global ELAPSED_TIME
+    global THREAD_IS_RUN
+    global INTERV
+    i = 0
+
+    while THREAD_IS_RUN:
+        try:
+            clipname = 'clip' + i +'.mjpeg'
+            camera.wait_recording(35)
+            output.buffer.copy_to(clipname)
+            i+=1
+            print(clipname + 'clipped')
+            ELAPSED_TIME += INTERV
+        except:
+            print('error')
+
+# start process
+@app.route('/start')
+def start():
+    # read from GPIO
+    global THREAD_IS_RUN
+    global READ_THREAD
+    global ELAPSED_TIME
+    global output
+    print('Clipping')
+
+    if READ_THREAD is None:
+        print('Clipping code')
+        ELAPSED_TIME = 0
+        #Clearing the buffer when pressing start
+        output.buffer.clear()
+        THREAD_IS_RUN = True
+        READ_THREAD = threading.Thread(target=clip_buffer)
+        READ_THREAD.start()
+        return 'Start clippipng..'
+    return 'Clipping already running..'
+
+#Ending of process
+@app.route('/stop')
+def stop():
+    # stop reading
+    global THREAD_IS_RUN
+    global READ_THREAD
+    if READ_THREAD is not None:
+        THREAD_IS_RUN = False
+        READ_THREAD.join()
+        READ_THREAD = None
+        return 'Stopped clipping..'
+    return 'Clipping not running..'
 
 #Streaming class
 class StreamingOutput(object):
@@ -35,29 +92,6 @@ class StreamingOutput(object):
                 self.condition.notify_all()
             self.buffer.seek(0)
         return self.buffer.write(buf)
-
-#Clipping function
-def clip_buffer():
-    global ELAPSED_TIME
-    global THREAD_IS_RUN
-    global INTERV
-    i = 0
-
-    while THREAD_IS_RUN:
-        try:
-            print('Thread is run')
-            print('Making name')
-            clipname = 'clip' + str(i) + '.mjpeg'
-            print(clipname)
-            print('waiting')
-            camera.wait_recording(35)
-            print('camera waited')
-            output.buffer.copy_to(clipname)
-            i+=1
-            print(clipname + ' clipped')
-            ELAPSED_TIME += INTERV
-        except:
-            print(i)
 
 #Server paths and error checks
 class StreamingHandler(server.BaseHTTPRequestHandler):
@@ -86,43 +120,6 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                 logging.warning(
                     'Removed streaming client %s: %s',
                     self.client_address, str(e))
-
-        #Start process
-        elif self.path == '/start':
-            global THREAD_IS_RUN
-            global READ_THREAD
-            global ELAPSED_TIME
-
-            if READ_THREAD is None:
-                print('Begin Clipping')
-                output.buffer.clear()
-                try:
-                    print('Clipping')
-                    ELAPSED_TIME = 0
-                    #Clearing the buffer when pressing start
-                    THREAD_IS_RUN = True
-                    READ_THREAD = threading.Thread(target=clip_buffer)
-                    READ_THREAD.start()
-
-                except Exception as e:
-                    print(e)
-                    return 'Clipping already running..'
-
-        elif self.path == '/stop':
-            global THREAD_IS_RUN
-            global READ_THREAD
-
-            if READ_THREAD is not None:
-                try:
-                    THREAD_IS_RUN = False
-                    READ_THREAD.join()
-                    READ_THREAD = None
-                    return 'Clipping stopped'
-
-                except Exception as e:
-                    print(e)
-                    return 'Clipping not running..'
-
         else:
             print('Stream failed to start')
             self.send_error(404)
@@ -132,16 +129,25 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
     allow_reuse_address = True
     daemon_threads = True
 
-#Booting up the camera and settings
-with picamera.PiCamera(resolution='640x480', framerate=90) as camera:
-    #The Streaming Output
-    output = StreamingOutput()
-    #Begin recording
-    camera.start_recording(output, format='mjpeg')
+if __name__ == '__main__':
+
     try:
-        #Target address (pi ip:8000)
-        address = ('', 8000)
-        server = StreamingServer(address, StreamingHandler)
-        server.serve_forever()
-    finally:
-        camera.stop_recording()
+        #Creating the server (streamer.py)
+        #Booting up the camera and settings
+        with picamera.PiCamera(resolution='640x480', framerate=90) as camera:
+            #The Streaming Output
+            output = StreamingOutput()
+            #Begin recording
+            camera.start_recording(output, format='mjpeg')
+            try:
+                # Target address (pi ip:8000)
+                address = ('', 8000)
+                server = StreamingServer(address, StreamingHandler)
+                server.serve_forever()
+                app.run(host='0.0.0.0', port=8001)
+            finally:
+                camera.stop_recording()
+
+    except Exception as e:
+        print(e)
+        sys.exit(1)
