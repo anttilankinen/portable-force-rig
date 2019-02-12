@@ -19,6 +19,7 @@ export default class Calibrate extends Component {
     this.setState({ ready: false, status: 'Calibrating..' });
     let value = count ? (weight ? weight : 0) : 0;
     console.log(value);
+    fetch('localhost:7006/begin')
     // Endpoint /calibrate/begin with { weight: value }
     setTimeout(() => {
       this.setState({

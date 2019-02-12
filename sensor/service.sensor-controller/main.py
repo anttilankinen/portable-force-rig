@@ -55,12 +55,12 @@ def read_devices():
         if ZEROED:
             value1 = value1 - BIAS1
 
-        else
+        else:
             BIAS1 = value1
             value1 = 0
             ZEROED = True
 
-        if value1 < 0
+        if value1 < 0:
             value1 = 0
 
         previous_value1 = value1
@@ -116,7 +116,7 @@ if __name__ == '__main__':
         DEV1_CTX = smbus.SMBus(DEV1_BUS)
 
     except IOError as e:
-        print e.message
+        print(e.message)
         sys.exit(1)
 
     app.run(host='0.0.0.0', port=80)

@@ -1,3 +1,4 @@
 redis==2.10.6
 flask==1.0
 smbus2==0.2.3
+numpy
