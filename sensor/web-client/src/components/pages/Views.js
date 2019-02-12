@@ -8,25 +8,24 @@ export default class Views extends Component {
   }
 
   componentDidMount() {
-    const index = this.props.location.pathname.split("/")[2];
+    const id = this.props.location.pathname.split("/")[2];
 
-    fetch('/api/rpi/data')
+    fetch(`/api/rpi/data/${id}`)
     .then(res => res.json())
     .then(json => {
-      const history = JSON.parse(json.rows[index-1].readings);
-      this.setState({ view: history });
+      this.setState({ view: json.row });
     });
   }
 
   render() {
     const { view } = this.state;
 
-    chartData.labels = view.map((index) => (index * 0.025).toFixed(3));
-    chartData.datasets[0].data = view;
+    chartData.labels = view.readings.map((index) => (index * 0.025).toFixed(3));
+    chartData.datasets[0].data = view.readings;
 
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
-        <h4>{view}</h4>
+        <h4>{view.date_time}</h4>
         <div>
           <Line data={chartData} options={chartOptions} height={350}/>
         </div>

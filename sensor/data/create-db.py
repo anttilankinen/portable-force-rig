@@ -8,6 +8,7 @@ def main():
     cursor = sqlite_conn.cursor()
 
     cursor.execute('''CREATE TABLE IF NOT EXISTS database (
+        id TEXT,
         date_time TEXT,
         ant_size TEXT,
         readings TEXT
