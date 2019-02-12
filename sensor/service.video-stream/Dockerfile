@@ -1,7 +1,5 @@
 FROM python:3.7-stretch
 
-RUN usermod -aG video root
-
 WORKDIR /usr/src/app
 
 COPY . .

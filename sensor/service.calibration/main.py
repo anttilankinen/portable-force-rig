@@ -104,8 +104,8 @@ def calibrate():
 
     data = request.get_json()
     # if sensor not started
-    if READ_THREAD is None:
-        print('Calibrating..')
+    if data is not None and READ_THREAD is None:
+        print('Calibrating for weight: ' + str(data['weight']))
         # start reading from sensor
         ELAPSED_TIME = 0
         THREAD_IS_RUN = True
@@ -152,4 +152,4 @@ if __name__ == '__main__':
         print(e.message)
         sys.exit(1)
 
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=7006)

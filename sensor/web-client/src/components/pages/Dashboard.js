@@ -95,7 +95,7 @@ export default class Dashboard extends Component {
             <i className="upload icon"></i>Upload
           </button>
         </div>
-        <img src="http://localhost:8000/stream.mjpg" alt="Video stream currently unavailable" width="640" height="480" />
+        <img src="http://localhost:7007/stream.mjpg" alt="Video stream currently unavailable" width="640" height="480" />
       </div>
     );
   }

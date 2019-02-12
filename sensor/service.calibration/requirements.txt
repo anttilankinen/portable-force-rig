@@ -1,3 +1,5 @@
 flask==1.0
 smbus2==0.2.3
-scikit-learn=0.20.2
+numpy
+scipy
+scikit-learn
