@@ -23,9 +23,10 @@ const TableBody = props => {
       <td>{row.readings}</td>
       <td>{typeof(row.readings)}</td>
       <td>
-        <div key={index+1}>
+        <div key={index + 1}>
           <Link to={{
-              pathname:`/history/${index + 1}`}} className="ui violet button">
+              pathname: `/history/${index + 1}`
+            }} className="ui violet button">
             <i className="info circle icon"></i>View
           </Link>
         </div>

@@ -11,11 +11,9 @@ class Views extends Component {
   }
 
   componentDidMount() {
-
     const index = this.props.location.pathname.split("/")[2];
-
     fetch('/api/rpi/data').then(res => res.json()).then(json => {
-      const history = JSON.parse(json.rows[index-1].readings);
+      const history = JSON.parse(json.rows[index - 1].readings);
       this.setState({view: history});
     });
   }

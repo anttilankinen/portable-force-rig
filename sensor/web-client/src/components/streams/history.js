@@ -16,7 +16,7 @@ class History extends Component {
 
   render() {
     const {saved} = this.state;
-    
+
     return (<div style={{
         textAlign: 'center',
         padding: '30px'
