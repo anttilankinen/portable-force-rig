@@ -3,16 +3,16 @@
 import os
 import random
 import time
-import redis
+#import redis
 import threading
-from flask import Flask
+#from flask import Flask
 import smbus
 
-REDIS_PORT = int(os.getenv('REDIS_PORT'))
+#REDIS_PORT = int(os.getenv('REDIS_PORT'))
 
-app = Flask(__name__)
-redis_client = redis.StrictRedis(host='redis', port=REDIS_PORT, db=0)
-reddis_channel = redis_client.pubsub()
+#app = Flask(__name__)
+#redis_client = redis.StrictRedis(host='redis', port=REDIS_PORT, db=0)
+#reddis_channel = redis_client.pubsub()
 
 INTERVAL = 25 # in ms
 ELAPSED_TIME = 0
@@ -79,20 +79,21 @@ def read_devices(out_file):
         if ZEROED:
             value1 = value1 - BIAS1
             value2 = value2 - BIAS2
-        else
+        else:
             BIAS1 = value1
             BIAS2 = value2
             value1 = 0
             value2 = 0
             ZEROED = True
 
-        out_file.write('%i, %i, %.2f\n' % (value1, value2, ELAPSED_TIME))
-        redis_client.publish('sensor-data', f'{value1}')
+        #out_file.write('%i, %i, %.2f\n' % (value1, value2, ELAPSED_TIME))
+#        redis_client.publish('sensor-data', f'{value1}')
         time.sleep(INTERVAL / float(1000))
         ELAPSED_TIME = ELAPSED_TIME + INTERVAL
+        print(value1)
 
 # start process to read from GPIO
-@app.route('/start')
+#@app.route('/start')
 def start():
     # read from GPIO
     global out_file
@@ -103,13 +104,13 @@ def start():
     if READ_THREAD is None:
         ELAPSED_TIME = 0
         THREAD_IS_RUN = True
-        READ_THREAD = threading.Thread(target=read_device, args=(out_file,))
+        READ_THREAD = threading.Thread(target=read_devices, args=(out_file,))
         READ_THREAD.start()
         return 'Started reading from sensor..'
     return 'Sensor already running..'
 
 # stop process to read from GPIO
-@app.route('/stop')
+#@app.route('/stop')
 def stop():
     # stop reading
     global THREAD_IS_RUN
@@ -123,12 +124,13 @@ def stop():
 
 if __name__ == '__main__':
     # open file to write data
-    out_file = open(int(time.time()) + '.txt', 'w')
+    out_file = open(str(int(time.time())) + '.txt', 'w')
     # try to connect to sensor
     try:
         DEV1_CTX = smbus.SMBus(DEV1_BUS)
         DEV2_CTX = smbus.SMBus(DEV2_BUS)
     except IOError as e:
-        print e.message
+        print(e.message)
         sys.exit(1)
-    app.run(host='0.0.0.0', port=80)
+    start()
+#    app.run(host='0.0.0.0', port=80)
