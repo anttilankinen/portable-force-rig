@@ -43,23 +43,21 @@ def clip_buffer():
     global INTERV
     i = 0
 
-    print('Thread is run')
-    print('Making name')
-    clipname = 'clip' + str(i) + '.h264'
-    camera.start_recording(clipname, splitter_port=2)
-    print('Recording '+ clipname)
-
     while THREAD_IS_RUN:
         try:
+            print('Thread is run')
+            print('Making name')
+            clipname = 'clip' + str(i) + '.mjpeg'
+            print(clipname)
             print('waiting')
-            camera.wait_recording(10)
-        except Exception as e:
-            print(e)
-
-    camera.stop_recording(splitter_port=2)
-    i+=1
-    print(clipname + ' clipped')
-    ELAPSED_TIME += INTERV
+            camera.wait_recording(35)
+            print('camera waited')
+            output.buffer.copy_to(clipname, seconds=35, first_frame=None)
+            i+=1
+            print(clipname + ' clipped')
+            ELAPSED_TIME += INTERV
+        except:
+            print(i)
 
 #Server paths and error checks
 class StreamingHandler(server.BaseHTTPRequestHandler):
@@ -97,6 +95,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
             if READ_THREAD is None:
                 print('Begin Clipping')
+                output.buffer.clear()
                 try:
                     print('Clipping')
                     ELAPSED_TIME = 0
@@ -136,7 +135,7 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
     daemon_threads = True
 
 #Booting up the camera and settings
-with picamera.PiCamera(resolution='640x480', framerate=60) as camera:
+with picamera.PiCamera(resolution='640x480', framerate=90) as camera:
     #The Streaming Output
     output = StreamingOutput()
     #Begin recording
