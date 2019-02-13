@@ -28,6 +28,8 @@ services:
     env_file: ./.env
     image: portable-force-rig/service.event-bus:1.0
     container_name: service.event-bus
+    depends_on:
+      - redis
     ports:
       - 7002:80
     volumes:
@@ -53,6 +55,8 @@ services:
     env_file: ./.env
     image: portable-force-rig/service.sensor-controller:1.0
     container_name: service.sensor-controller
+    depends_on:
+      - redis
     ports:
       - 7004:80
     volumes:

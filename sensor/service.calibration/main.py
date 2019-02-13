@@ -53,8 +53,6 @@ def read_device(weight, datapoints=100):
     global data_collected
     timestamp = 1
 
-    # clear up previously unused preallocated space from training data
-
     # preallocated space for training data
     data_space = np.concatenate([np.zeros([datapoints,1]),
         weight * np.ones([datapoints, 1])], axis=1)

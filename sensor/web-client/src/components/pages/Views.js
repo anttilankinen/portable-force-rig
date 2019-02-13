@@ -13,15 +13,17 @@ export default class Views extends Component {
     fetch(`/api/rpi/data/${id}`)
     .then(res => res.json())
     .then(json => {
-      this.setState({ view: json.row });
+      this.setState({ view: json.row[0] });
     });
   }
 
   render() {
     const { view } = this.state;
 
-    chartData.labels = view.readings.map((index) => (index * 0.025).toFixed(3));
-    chartData.datasets[0].data = view.readings;
+    const readings = JSON.parse(view.readings);
+
+    chartData.labels = readings.map((index) => (index * 0.025).toFixed(3));
+    chartData.datasets[0].data = readings;
 
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>

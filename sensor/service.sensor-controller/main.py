@@ -34,7 +34,6 @@ def read_devices():
     global OUT_FILE
     timestamp = 1
     previous_value1 = 0
-    previous_value2 = 0
 
     while THREAD_IS_RUN:
         value, frameindex = 0, 0
@@ -71,10 +70,10 @@ def read_devices():
                 value1 = -1
 
             else:
-                value1 = LOOKUP_TABLE[0, value1]
+                value1 = LOOKUP_TABLE[value1]
 
-        out_file.write('%i, %.2f\n' % (value1, ELAPSED_TIME))
-        redis_client.publish('sensor-data', f'{value1}')
+        OUT_FILE.write('%i, %.2f\n' % (value1, ELAPSED_TIME))
+        redis_client.publish('sensor-data', str(value1))
         time.sleep(INTERVAL / float(1000))
         ELAPSED_TIME = ELAPSED_TIME + INTERVAL
 
@@ -110,10 +109,10 @@ def stop():
 if __name__ == '__main__':
     # open file to write data
     LOOKUP_TABLE = np.load('lookup.npy')
-    OUT_FILE= open(int(time.time()) + '.txt', 'w')
+    OUT_FILE = open('./saved-readings/' + str(int(time.time())) + '.txt', 'w')
     # try to connect to sensor
     try:
-        DEV1_CTX = smbus.SMBus(DEV1_BUS)
+        DEV1_CTX = smbus2.SMBus(DEV1_BUS)
 
     except IOError as e:
         print(e.message)
