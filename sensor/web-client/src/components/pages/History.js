@@ -11,6 +11,7 @@ export default class History extends Component {
     .then(res => res.json())
     .then(json => {
       const history = json.rows.map(row => ({
+        id: row.id,
         date: row.date_time,
         antSize: row.ant_size,
         readings: row.readings

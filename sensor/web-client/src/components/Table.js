@@ -6,10 +6,9 @@ const TableHeader = props => {
     <thead>
       <tr>
         <th className="one wide">#</th>
-        <th className="two wide">Date</th>
-        <th className="two wide">Ant Size</th>
-        <th className="six wide">Force Readings</th>
-        <th className="two wide">Max. Bite Force</th>
+        <th className="five wide">Date</th>
+        <th className="four wide">Ant Size</th>
+        <th className="three wide">Max. Bite Force</th>
         <th className="three wide"></th>
       </tr>
     </thead>
@@ -23,8 +22,7 @@ const TableBody = props => {
         <td>{index + 1}</td>
         <td>{row.date}</td>
         <td>{row.antSize}</td>
-        <td>{row.readings}</td>
-        <td>{typeof(row.readings)}</td>
+        <td>{Math.max(...JSON.parse(row.readings))}</td>
         <td>
           <Link
             to={{ pathname:`/history/${row.id}` }}

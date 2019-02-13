@@ -20,10 +20,11 @@ export default class Views extends Component {
   render() {
     const { view } = this.state;
 
-    const readings = JSON.parse(view.readings);
-
-    chartData.labels = readings.map((index) => (index * 0.025).toFixed(3));
-    chartData.datasets[0].data = readings;
+    if (view.readings) {
+      const readings = JSON.parse(view.readings);
+      chartData.labels = readings.map((value, index) => (index * 0.025).toFixed(3));
+      chartData.datasets[0].data = readings;
+    }
 
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
