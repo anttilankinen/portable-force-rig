@@ -13,6 +13,7 @@ app = Flask(__name__)
 redis_client = redis.StrictRedis(host='redis', port=REDIS_PORT, db=0)
 reddis_channel = redis_client.pubsub()
 
+OUTFILE = None
 INTERVAL = 25 # in ms
 ELAPSED_TIME = 0
 READ_THREAD = None
@@ -84,8 +85,10 @@ def start():
     global THREAD_IS_RUN
     global READ_THREAD
     global ELAPSED_TIME
+    global OUT_FILE
 
     if READ_THREAD is None:
+        OUT_FILE = open('./saved-readings/' + str(int(time.time())) + '.txt', 'w')
         ELAPSED_TIME = 0
         THREAD_IS_RUN = True
         READ_THREAD = threading.Thread(target=read_devices)
@@ -107,9 +110,8 @@ def stop():
     return 'Sensor not running..'
 
 if __name__ == '__main__':
-    # open file to write data
+    # open lookup table
     LOOKUP_TABLE = np.load('lookup.npy')
-    OUT_FILE = open('./saved-readings/' + str(int(time.time())) + '.txt', 'w')
     # try to connect to sensor
     try:
         DEV1_CTX = smbus2.SMBus(DEV1_BUS)

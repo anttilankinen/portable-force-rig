@@ -129,6 +129,9 @@ def create_lookup():
     global train_data
     global data_collected
 
+    if train_data is None:
+        return 'Nothing to be calibrated'
+
     print('Computing look-up table..')
     table = calibration_function(train_data)
     np.save('./lookup', table)
