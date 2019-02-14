@@ -9,7 +9,7 @@ class History extends Component {
 
   componentDidMount() {
     fetch('/api/rpi/data').then(res => res.json()).then(json => {
-      const history = json.rows.map(row => ({date: '12/10/2018', antSize: row.ant_size, readings: row.readings}))
+      const history = json.rows.map(row => ({id: row.id, date: row.date_time, antSize: row.ant_size, readings: row.readings}))
       this.setState({saved: history});
     });
   }
