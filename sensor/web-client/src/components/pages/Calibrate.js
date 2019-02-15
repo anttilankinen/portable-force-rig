@@ -20,10 +20,10 @@ export default class Calibrate extends Component {
     this.setState({ ready: false, status: 'Calibrating..' });
     let value = count ? (weight ? weight : 0) : 0;
 
-    fetch('http://localhost:7006/begin', {
+    fetch('/api/calibration/begin', {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
-      body: { weight: value },
+      body: JSON.stringify({ weight: value }),
     }).then(res => res.text())
     .then(string => {
       this.setState({
@@ -36,7 +36,7 @@ export default class Calibrate extends Component {
   }
 
   end = () => {
-    fetch('http://localhost:7006/end')
+    fetch('/api/calibration/end')
     .then(res => res.text())
     .then(string => {
       console.log(string);

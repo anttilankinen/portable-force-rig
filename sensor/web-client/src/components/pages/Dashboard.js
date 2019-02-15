@@ -48,15 +48,6 @@ export default class Dashboard extends Component {
     this.setState({ current: [] });
   }
 
-  uploadData = () => {
-    fetch('/api/data-upload/')
-    .then(res => res.text())
-    .then(string => {
-      console.log(string);
-      this.setState({ status: 'Data uploaded successfully!' });
-    });
-  }
-
   componentDidMount() {
     const socket = socketIOClient('http://localhost:7002');
     socket.on('connected', message => console.log(message));
@@ -90,9 +81,6 @@ export default class Dashboard extends Component {
           </button>
           <button className="ui blue button" onClick={this.saveData} disabled={started}>
             <i className="download icon"></i>Save
-          </button>
-          <button className="ui brown button" onClick={this.uploadData}>
-            <i className="upload icon"></i>Upload
           </button>
         </div>
         <img src="http://localhost:7007/stream.mjpg" alt="Video stream currently unavailable" width="640" height="480" />

@@ -74,7 +74,7 @@ def read_devices():
                 value1 = LOOKUP_TABLE[value1]
 
         OUT_FILE.write('%i, %.2f\n' % (value1, ELAPSED_TIME))
-        redis_client.publish('sensor-data', str(value1[0]))
+        redis_client.publish('sensor-data', "{:.3f}".format(value1[0]))
         time.sleep(INTERVAL / float(1000))
         ELAPSED_TIME = ELAPSED_TIME + INTERVAL
 
