@@ -4,10 +4,12 @@ import sys
 import time
 import numpy as np
 from flask import Flask, request
+from flask_cors import CORS
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 
 app = Flask(__name__)
+CORS(app)
 
 INTERVAL = 25 # in ms
 READ_THREAD = None
@@ -100,7 +102,8 @@ def calibrate():
     global ELAPSED_TIME
     global train_data
 
-    data = request.get_json()
+    data = request.get_json(force=True)
+    print('Starting:')
     # if sensor not started
     if data is not None and READ_THREAD is None:
         print('Calibrating for weight: ' + str(data['weight']))

@@ -23,7 +23,7 @@ export default class Calibrate extends Component {
     fetch('http://localhost:7006/begin', {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
-      body: { weight: value },
+      body: JSON.stringify({ weight: value }),
     }).then(res => res.text())
     .then(string => {
       this.setState({

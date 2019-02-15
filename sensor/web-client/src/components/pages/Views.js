@@ -28,7 +28,7 @@ export default class Views extends Component {
 
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
-        <h4>{view.date_time}</h4>
+        <h4>Date: {view.date_time}</h4>
         <div>
           <Line data={chartData} options={chartOptions} height={350}/>
         </div>
