@@ -11,11 +11,13 @@ import socketserver
 from threading import Condition
 from http import server
 
+#For converting
+import converter
+
 #Global variables
 ELAPSED_TIME = 0
 READ_THREAD = None
 THREAD_IS_RUN = False
-INTERV = 35
 
 #Streaming class
 class StreamingOutput(object):
@@ -40,14 +42,12 @@ class StreamingOutput(object):
 def clip_buffer():
     global ELAPSED_TIME
     global THREAD_IS_RUN
-    global INTERV
-    i = 0
 
     print('Thread is run')
     print('Making name')
-    clipname = 'clip' + str(i) + '.h264'
+    clipname = 'clip.h264'
     camera.start_recording(clipname, splitter_port=2)
-    print('Recording '+ clipname)
+    print('Recording')
 
     while THREAD_IS_RUN:
         try:
@@ -58,8 +58,9 @@ def clip_buffer():
 
     camera.stop_recording(splitter_port=2)
     i+=1
-    print(clipname + ' clipped')
-    ELAPSED_TIME += INTERV
+    print('Clipping completed')
+    converter.convert(clipname)
+    converter.delete(clipname)
 
 #Server paths and error checks
 class StreamingHandler(server.BaseHTTPRequestHandler):
