@@ -29,12 +29,13 @@ router.get('/data/:id', async (ctx, next) => {
 });
 
 router.post('/data', bodyParser, async (ctx, next) => {
+  let fileName = `${ctx.request.body.id}.mp4`;
   let dataString = `[${ctx.request.body.data.join(', ')}]`;
   console.log(`Saving new readings to database: ${dataString}`);
   try {
     let now = new Date();
     const db = await dbPromise;
-    db.run('INSERT INTO database (id, date_time, ant_size, readings) VALUES (?, ?, ?, ?)', [uuidv4(), now.toLocaleString(), 'Large', dataString]);
+    db.run('INSERT INTO database (id, date_time, ant_size, readings, file_name) VALUES (?, ?, ?, ?, ?)', [uuidv4(), now.toLocaleString(), 'Large', dataString, fileName]);
     ctx.body = `Readings successfully saved to the database: ${dataString}`;
   } catch (err) {
     console.log(err);

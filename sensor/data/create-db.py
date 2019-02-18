@@ -11,7 +11,8 @@ def main():
         id TEXT,
         date_time TEXT,
         ant_size TEXT,
-        readings TEXT
+        readings TEXT,
+        file_name TEXT
     )''')
 
     cursor.execute('SELECT * FROM database')

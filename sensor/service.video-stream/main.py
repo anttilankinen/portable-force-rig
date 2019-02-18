@@ -1,4 +1,9 @@
-#!/usr/bin/env python3
+#For Threading
+import os
+import time
+import threading
+
+#For streaming
 import io
 import picamera
 import logging
@@ -6,11 +11,18 @@ import socketserver
 from threading import Condition
 from http import server
 
+#Global variables
+ELAPSED_TIME = 0
+READ_THREAD = None
+THREAD_IS_RUN = False
+INTERV = 35
+
+#Streaming class
 class StreamingOutput(object):
     def __init__(self):
         self.frame = None
         # seconds = the duration of the memory held in the stream memory
-        self.buffer = picamera.PiCameraCircularIO(camera, seconds=20)
+        self.buffer = picamera.PiCameraCircularIO(camera, seconds=35)
         self.condition = Condition()
 
     def write(self, buf):
@@ -24,22 +36,34 @@ class StreamingOutput(object):
             self.buffer.seek(0)
         return self.buffer.write(buf)
 
+#Clipping function
+def clip_buffer():
+    global ELAPSED_TIME
+    global THREAD_IS_RUN
+    global INTERV
+    i = 0
+
+    print('Thread is run')
+    print('Making name')
+    clipname = 'clip' + str(i) + '.h264'
+    camera.start_recording(clipname, splitter_port=2)
+    print('Recording '+ clipname)
+
+    while THREAD_IS_RUN:
+        try:
+            print('waiting')
+            camera.wait_recording(10)
+        except Exception as e:
+            print(e)
+
+    camera.stop_recording(splitter_port=2)
+    i+=1
+    print(clipname + ' clipped')
+    ELAPSED_TIME += INTERV
+
 #Server paths and error checks
 class StreamingHandler(server.BaseHTTPRequestHandler):
     def do_GET(self):
-        #EXTRA CODE (NOT NEEDED)
-        # if self.path == '/':
-        #     self.send_response(301)
-        #     self.send_header('Location', '/index.html')
-        #     self.end_headers()
-        # elif self.path == '/index.html':
-        #     content = PAGE.encode('utf-8')
-        #     self.send_response(200)
-        #     self.send_header('Content-Type', 'text/html')
-        #     self.send_header('Content-Length', len(content))
-        #     self.end_headers()
-        #     self.wfile.write(content)
-
         #Setting the path of the stream
         if self.path == '/stream.mjpg':
             self.send_response(200)
@@ -49,6 +73,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             self.send_header('Content-Type', 'multipart/x-mixed-replace; boundary=FRAME')
             self.end_headers()
             try:
+                print('Stream successfully started')
                 while True:
                     with output.condition:
                         output.condition.wait()
@@ -59,21 +84,61 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(frame)
                     self.wfile.write(b'\r\n')
-                    print('Stream successfully started')
             except Exception as e:
                 logging.warning(
                     'Removed streaming client %s: %s',
                     self.client_address, str(e))
+
+        #End Process
+        elif self.path == '/stop':
+            global THREAD_IS_RUN
+            global READ_THREAD
+
+            if READ_THREAD is not None:
+                print('Stopping Clipping')
+                try:
+                    THREAD_IS_RUN = False
+                    READ_THREAD.join()
+                    READ_THREAD = None
+                    return 'Clipping stopped'
+
+                except Exception as e:
+                    print(e)
+                    return 'Clipping not running..'
+
         else:
+            print('Stream failed to start')
             self.send_error(404)
             self.end_headers()
+
+    def do_POST(self):
+        #Start process
+        if self.path == '/start':
+            global THREAD_IS_RUN
+            global READ_THREAD
+            global ELAPSED_TIME
+
+            if READ_THREAD is None:
+                print('Begin Clipping')
+                try:
+                    print('Clipping')
+                    ELAPSED_TIME = 0
+                    #Clearing the buffer when pressing start
+                    THREAD_IS_RUN = True
+                    READ_THREAD = threading.Thread(target=clip_buffer)
+                    READ_THREAD.start()
+
+                except Exception as e:
+                    print(e)
+                    return 'Clipping already running..'
+
 
 class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
     allow_reuse_address = True
     daemon_threads = True
 
 #Booting up the camera and settings
-with picamera.PiCamera(resolution='640x480', framerate=90) as camera:
+with picamera.PiCamera(resolution='640x480', framerate=60) as camera:
     #The Streaming Output
     output = StreamingOutput()
     #Begin recording

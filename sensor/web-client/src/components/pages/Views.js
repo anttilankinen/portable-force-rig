@@ -32,6 +32,10 @@ export default class Views extends Component {
         <div>
           <Line data={chartData} options={chartOptions} height={350}/>
         </div>
+        <video width="600" height="400" muted preload="auto" controls>
+          <source src="http://static-movie-usa.glencoesoftware.com/source/10.1242/866/2308a6728516b8f9b372095fd0db9beca324db05/JEB132399-Video1.mp4"
+          type="video/mp4">
+        </video>
       </div>
     )
   }
