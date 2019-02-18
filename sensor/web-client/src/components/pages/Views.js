@@ -19,6 +19,7 @@ export default class Views extends Component {
 
   render() {
     const { view } = this.state;
+    const videoPath = `./recordings/${view.file_path}`;
 
     if (view.readings) {
       const readings = JSON.parse(view.readings);
@@ -32,6 +33,9 @@ export default class Views extends Component {
         <div>
           <Line data={chartData} options={chartOptions} height={350}/>
         </div>
+        <video width="600" height="400" muted controls>
+          <source src={videoPath} type="video/mp4" />
+        </video>
       </div>
     )
   }

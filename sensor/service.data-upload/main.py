@@ -54,9 +54,15 @@ def main():
     print('Formatting data..')
     documents = []
     for row in db_data:
-        id, date_time, ant_size, row_data = row
+        id, date_time, ant_size, row_data, file_name = row
         data_array = json.loads(row_data)
-        new_document = {'id': id, 'dateTime': date_time, 'antSize': ant_size, 'data': data_array}
+        new_document = {
+            'id': id,
+            'dateTime': date_time,
+            'antSize': ant_size,
+            'data': data_array,
+            'fileName': file_name
+        }
         documents.append(new_document)
 
     if documents:

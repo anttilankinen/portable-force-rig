@@ -2,15 +2,28 @@ import React, { Component } from 'react';
 import { Line } from 'react-chartjs-2';
 import socketIOClient from 'socket.io-client';
 import { chartOptions, chartData } from '../chartSettings';
+import uuidv4 from 'uuid/v4';
 
 export default class Dashboard extends Component {
   state = {
     current: [],
+    currentId: null,
     started: false,
     status: 'Sensor ready!'
   }
 
   startRecording = () => {
+    // const id = uuidv4();
+    // fetch('http://localhost:7007/start', {
+    //   method: 'post',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ id: id }),
+    // }).then(res => res.text())
+    // .then(string => {
+    //   console.log(string);
+    //   this.setState({ currentId: id });
+    // });
+
     fetch('/api/sensor-controller/start')
     .then(res => res.text())
     .then(string => {
@@ -20,6 +33,10 @@ export default class Dashboard extends Component {
   }
 
   stopRecording = () => {
+    // fetch('http://localhost:7007/stop')
+    //   .then(res => res.text())
+    //   .then(string => console.log(string));
+
     fetch('/api/sensor-controller/stop')
     .then(res => res.text())
     .then(string => {
@@ -29,9 +46,9 @@ export default class Dashboard extends Component {
   }
 
   saveData = () => {
-    const { current } = this.state;
+    const { current, currentId } = this.state;
     if (current && current.length) {
-      const JSONdata = JSON.stringify({ data: current });
+      const JSONdata = JSON.stringify({ id: currentId, data: current });
       fetch('/api/rpi/data', {
         method: 'post',
         headers: { 'Content-Type': 'application/json' },
