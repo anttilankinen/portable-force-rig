@@ -10,6 +10,7 @@ MLAB_PORT = int(os.getenv('MLAB_PORT'))
 MLAB_USER = os.getenv('MLAB_USER')
 MLAB_PASS = os.getenv('MLAB_PASS')
 
+
 def readDb():
 
     print('Connecting to SQLite database..')
@@ -29,6 +30,7 @@ def readDb():
 
     return data
 
+
 def upload(documents):
 
     print('Connecting to MongoDB..')
@@ -43,6 +45,7 @@ def upload(documents):
     print('Closing connectiong to MongoDB..')
     client.close()
 
+
 def main():
 
     db_data = readDb()
@@ -50,15 +53,17 @@ def main():
     print('Formatting data..')
     documents = []
     for row in db_data:
-        ant_size, row_data = row
+        id, date_time, ant_size, row_data = row
         data_array = json.loads(row_data)
-        new_document = {'antSize': ant_size, 'data': data_array}
+        new_document = {'id': id, 'dateTime': date_time,
+                        'antSize': ant_size, 'data': data_array}
         documents.append(new_document)
 
     if documents:
         upload(documents)
     else:
         print('No documents to upload..')
+
 
 if __name__ == '__main__':
 

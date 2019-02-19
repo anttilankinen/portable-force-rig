@@ -45,6 +45,29 @@ router.post('/data', bodyParser, async (ctx, next) => {
   }
 });
 
+router.del('/data/:id/delete', async (ctx, next) => {
+
+  let rowid = ctx.params.id;
+
+  try {
+    const db = await dbPromise;
+    const sql = `DELETE FROM database WHERE id = ?`;
+    db.run(sql, rowid, function(err) {
+      if (err) {
+        return console.error(err.message);
+      }
+    });
+    const rows = await db.all('SELECT * FROM database');
+    ctx.body = {
+      rows: rows
+    };
+  } catch (err) {
+    console.log(err);
+  }
+
+
+});
+
 api.use(router.routes());
 api.use(router.allowedMethods());
 
