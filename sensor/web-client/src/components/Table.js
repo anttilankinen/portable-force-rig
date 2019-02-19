@@ -14,18 +14,6 @@ const TableHeader = props => {
   </thead>);
 }
 
-const deleteData = (props) => {
-  const rowId = props.target.id;
-  fetch(`/history/$(rowId)/delete`, {
-    method: 'delete',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({id: 'rowId'})
-  }).then(res => res.text()).then(res => alert(res));
-
-}
-
 const TableBody = props => {
 
   const rows = props.tableData.map((row, index) => {
@@ -46,7 +34,7 @@ const TableBody = props => {
             <i className="info circle icon"></i>View
           </Link>
 
-          <button id={row.id} onClick={deleteData} className="ui red button">
+          <button id={row.id} onClick={() => props.delete(row.id)} className="ui red button">
             <i className="trash alternate outline icon"></i>Delete
           </button>
         </div>
@@ -65,7 +53,7 @@ class Table extends Component {
         textAlign: 'center'
       }}>
       <TableHeader/>
-      <TableBody tableData={tableData}/>
+      <TableBody delete={this.props.deleteprop} tableData={tableData}/>
     </table>);
   }
 }

@@ -10,19 +10,6 @@ class Views extends Component {
 
   }
 
-  deleteData = (props) => {
-    const rowId = props.target.id;
-    console.log(rowId)
-    fetch(`/history/$(rowId)/delete`, {
-      method: 'delete',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({id: 'rowId'})
-    }).then(res => res.text()).then(res => alert(res));
-
-  }
-
   componentDidMount() {
 
     const id = this.props.location.pathname.split("/")[2];
@@ -53,11 +40,7 @@ class Views extends Component {
       <div style={{
           textAlign: 'right',
           padding: '20px'
-        }}>
-        <button id={view.id} onClick={this.deleteData} className="ui red button">
-          <i className="trash alternate outline icon"></i>Delete
-        </button>
-      </div>
+        }}></div>
     </div>)
   }
 
