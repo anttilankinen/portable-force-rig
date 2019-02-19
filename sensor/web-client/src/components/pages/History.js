@@ -16,6 +16,23 @@ export default class History extends Component {
     });
   }
 
+  deleteData = (rowId) => {
+    fetch(`/api/rpi/data/${rowId}/delete`, {
+      method: 'delete',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: rowId })
+    }).then(res => res.json())
+    .then(json => {
+      const history = json.rows.map(row => ({
+        id: row.id,
+        date: row.date_time,
+        antSize: row.ant_size,
+        readings: row.readings
+      }));
+      this.setState({saved: history});
+    });
+  }
+
   componentDidMount() {
     fetch('/api/rpi/data')
     .then(res => res.json())
@@ -25,7 +42,7 @@ export default class History extends Component {
         date: row.date_time,
         antSize: row.ant_size,
         readings: row.readings
-      }))
+      }));
       this.setState({ saved: history });
     });
   }
@@ -38,7 +55,7 @@ export default class History extends Component {
           <i className="upload icon"></i>Upload
         </button>
         <h4 style={{ marginTop: '20px' }}>{status}</h4>
-        <Table tableData={saved}/>
+        <Table tableData={saved} handleDelete={this.deleteData}/>
       </div>
     );
   }

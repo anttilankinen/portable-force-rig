@@ -19,7 +19,7 @@ export default class Views extends Component {
 
   render() {
     const { view } = this.state;
-    const videoPath = `./recordings/${view.file_path}`;
+    const videoPath = `./recordings/${view.file_name}`;
 
     if (view.readings) {
       const readings = JSON.parse(view.readings);

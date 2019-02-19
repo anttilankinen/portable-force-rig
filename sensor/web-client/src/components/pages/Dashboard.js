@@ -13,16 +13,16 @@ export default class Dashboard extends Component {
   }
 
   startRecording = () => {
-    // const id = uuidv4();
-    // fetch('http://localhost:7007/start', {
-    //   method: 'post',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ id: id }),
-    // }).then(res => res.text())
-    // .then(string => {
-    //   console.log(string);
-    //   this.setState({ currentId: id });
-    // });
+    const id = uuidv4();
+    fetch('/record/begin', {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: id }),
+    }).then(res => res.text())
+    .then(string => {
+      console.log(string);
+      this.setState({ currentId: id });
+    });
 
     fetch('/api/sensor-controller/start')
     .then(res => res.text())
@@ -33,9 +33,9 @@ export default class Dashboard extends Component {
   }
 
   stopRecording = () => {
-    // fetch('http://localhost:7007/stop')
-    //   .then(res => res.text())
-    //   .then(string => console.log(string));
+    fetch('/record/end')
+      .then(res => res.text())
+      .then(string => console.log(string));
 
     fetch('/api/sensor-controller/stop')
     .then(res => res.text())

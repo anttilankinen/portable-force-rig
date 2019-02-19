@@ -6,7 +6,7 @@ from subprocess import CalledProcessError
 #Conversion code
 def convert(video, id):
     #Setting the name of the video
-    path = f'~/Repositories/portable-force-rig/sensor/service.video-stream/recordings/{id}'
+    path = '~/Repositories/portable-force-rig/sensor/service.video-stream/recordings/' + id
     print('Converting..')
     command = 'MP4Box -add {} {}.mp4'.format(video, path)
 
@@ -18,9 +18,9 @@ def convert(video, id):
     print('Finished')
 
 #Delete code
-def delete(videoName):
+def delete(video):
     #delete the temporary temp_video
-    command = f'rm ~/Repositories/portable-force-rig/sensor/service.video-stream/recordings/{videoName}'
+    command = 'rm ~/Repositories/portable-force-rig/sensor/service.video-stream/' + video
     try:
         output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:

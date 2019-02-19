@@ -5,6 +5,7 @@ import threading
 
 #For streaming
 import io
+import simplejson as json
 import picamera
 import logging
 import socketserver
@@ -89,10 +90,11 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                     self.client_address, str(e))
 
         #End Process
-        elif self.path == '/stop':
+        elif self.path == '/record/end':
             global THREAD_IS_RUN
             global READ_THREAD
 
+            print('Stop')
             if READ_THREAD is not None:
                 print('Stopping Clipping')
                 try:
@@ -103,7 +105,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
                 except Exception as e:
                     print(e)
-                    return 'Clipping not running..'
+                    return 'Fail to stop clipping'
 
         else:
             print('Stream failed to start')
@@ -112,12 +114,13 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
     def do_POST(self):
         #Start process
-        elif self.path == '/start':
+        if self.path == '/record/begin':
             global THREAD_IS_RUN
             global READ_THREAD
             global ELAPSED_TIME
 
-            post_data = self.rfile.read(int(self.headers['Content-Length']))
+            post_data = self.rfile.read(int(self.headers.get('Content-Length')))
+            json_data = json.loads(post_data)
             if READ_THREAD is None:
                 print('Begin Clipping')
                 try:
@@ -125,7 +128,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                     ELAPSED_TIME = 0
                     #Clearing the buffer when pressing start
                     THREAD_IS_RUN = True
-                    READ_THREAD = threading.Thread(target=clip_buffer, args=(post_data['id'],))
+                    READ_THREAD = threading.Thread(target=clip_buffer, args=(json_data['id'],))
                     READ_THREAD.start()
 
                 except Exception as e:
@@ -146,6 +149,7 @@ with picamera.PiCamera(resolution='640x480', framerate=60) as camera:
         #Target address (pi ip:8000)
         address = ('', 7007)
         server = StreamingServer(address, StreamingHandler)
+        print('Video streaming server running on port 7007')
         server.serve_forever()
     finally:
         camera.stop_recording()

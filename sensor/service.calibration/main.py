@@ -95,7 +95,7 @@ def read_device(weight, datapoints=100):
         data_collected = data_collected + 1
         time.sleep(INTERVAL / float(1000))
 
-@app.route('/begin', methods=['POST'])
+@app.route('/calibration/begin', methods=['POST'])
 def calibrate():
     global READ_THREAD
     global THREAD_IS_RUN
@@ -124,7 +124,7 @@ def calibrate():
         return 'Ready for next weight..'
     return 'Calibration already started..'
 
-@app.route('/end')
+@app.route('/calibration/end')
 def create_lookup():
     global ZEROED
     global BIAS1

@@ -6,10 +6,10 @@ const TableHeader = props => {
     <thead>
       <tr>
         <th className="one wide">#</th>
-        <th className="five wide">Date</th>
-        <th className="four wide">Ant Size</th>
+        <th className="four wide">Date</th>
+        <th className="three wide">Ant Size</th>
         <th className="three wide">Max. Bite Force</th>
-        <th className="three wide"></th>
+        <th className="five wide"></th>
       </tr>
     </thead>
   );
@@ -30,6 +30,9 @@ const TableBody = props => {
           >
             <i className="info circle icon"></i>View
           </Link>
+          <button onClick={() => props.handleDelete(row.id)} className="ui red button">
+            <i className="trash alternate outline icon"></i>Delete
+          </button>
         </td>
       </tr>
     );
@@ -39,12 +42,12 @@ const TableBody = props => {
 
 class Table extends Component {
   render () {
-    const { tableData } = this.props;
+    const { tableData, handleDelete } = this.props;
 
     return (
       <table className="ui striped table" style={{ marginTop: '40px', textAlign: 'center' }}>
         <TableHeader />
-        <TableBody tableData={tableData}/>
+        <TableBody tableData={tableData} handleDelete={handleDelete}/>
       </table>
     );
   }
