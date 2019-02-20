@@ -63,6 +63,13 @@ def clip_buffer(id):
 
 #Server paths and error checks
 class StreamingHandler(server.BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin","*")
+        self.send_header("Access-Control-Allow-Methods","*")
+        self.send_header("Access-Control-Allow-Headers","*")
+        self.end_headers()
+
     def do_GET(self):
         #Setting the path of the stream
         if self.path == '/stream.mjpg':
@@ -101,11 +108,21 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                     THREAD_IS_RUN = False
                     READ_THREAD.join()
                     READ_THREAD = None
-                    return 'Clipping stopped'
+                    self.send_response(200)
+                    self.send_header("Access-Control-Allow-Origin","*")
+                    self.send_header("Access-Control-Allow-Methods","*")
+                    self.send_header("Access-Control-Allow-Headers","*")
+                    self.end_headers()
+                    self.wfile.write('Stopped')
 
                 except Exception as e:
                     print(e)
-                    return 'Fail to stop clipping'
+                    self.send_response(500)
+                    self.send_header("Access-Control-Allow-Origin","*")
+                    self.send_header("Access-Control-Allow-Methods","*")
+                    self.send_header("Access-Control-Allow-Headers","*")
+                    self.end_headers()
+                    self.wfile.write(e)
 
         else:
             print('Stream failed to start')
@@ -126,14 +143,24 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                 try:
                     print('Clipping')
                     ELAPSED_TIME = 0
-                    #Clearing the buffer when pressing start
                     THREAD_IS_RUN = True
                     READ_THREAD = threading.Thread(target=clip_buffer, args=(json_data['id'],))
                     READ_THREAD.start()
+                    self.send_response(200)
+                    self.send_header("Access-Control-Allow-Origin","*")
+                    self.send_header("Access-Control-Allow-Methods","*")
+                    self.send_header("Access-Control-Allow-Headers","*")
+                    self.end_headers()
+                    self.wfile.write('Started')
 
                 except Exception as e:
                     print(e)
-                    return 'Clipping already running..'
+                    self.send_response(500)
+                    self.send_header("Access-Control-Allow-Origin","*")
+                    self.send_header("Access-Control-Allow-Methods","*")
+                    self.send_header("Access-Control-Allow-Headers","*")
+                    self.end_headers()
+                    self.wfile.write(e)
 
 class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
     allow_reuse_address = True
@@ -146,7 +173,6 @@ with picamera.PiCamera(resolution='640x480', framerate=60) as camera:
     #Begin recording
     camera.start_recording(output, format='mjpeg')
     try:
-        #Target address (pi ip:8000)
         address = ('', 7007)
         server = StreamingServer(address, StreamingHandler)
         print('Video streaming server running on port 7007')
