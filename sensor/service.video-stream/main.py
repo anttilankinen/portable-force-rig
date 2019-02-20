@@ -45,7 +45,7 @@ def clip_buffer(id):
     global THREAD_IS_RUN
 
     print('Creating empty file')
-    clipname = './recordings/clip.h264'
+    clipname = 'temp.h264'
     camera.start_recording(clipname, splitter_port=2)
     print('Recording')
 
@@ -59,7 +59,6 @@ def clip_buffer(id):
     camera.stop_recording(splitter_port=2)
     print('Clipping completed')
     converter.convert(clipname, id)
-    converter.delete(clipname)
 
 #Server paths and error checks
 class StreamingHandler(server.BaseHTTPRequestHandler):
@@ -113,7 +112,6 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                     self.send_header("Access-Control-Allow-Methods","*")
                     self.send_header("Access-Control-Allow-Headers","*")
                     self.end_headers()
-                    self.wfile.write('Stopped')
 
                 except Exception as e:
                     print(e)
@@ -122,7 +120,6 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                     self.send_header("Access-Control-Allow-Methods","*")
                     self.send_header("Access-Control-Allow-Headers","*")
                     self.end_headers()
-                    self.wfile.write(e)
 
         else:
             print('Stream failed to start')
@@ -151,7 +148,6 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                     self.send_header("Access-Control-Allow-Methods","*")
                     self.send_header("Access-Control-Allow-Headers","*")
                     self.end_headers()
-                    self.wfile.write('Started')
 
                 except Exception as e:
                     print(e)
@@ -160,7 +156,6 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                     self.send_header("Access-Control-Allow-Methods","*")
                     self.send_header("Access-Control-Allow-Headers","*")
                     self.end_headers()
-                    self.wfile.write(e)
 
 class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
     allow_reuse_address = True

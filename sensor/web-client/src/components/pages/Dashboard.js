@@ -14,7 +14,7 @@ export default class Dashboard extends Component {
 
   startRecording = () => {
     const id = uuidv4();
-    fetch('/record/begin', {
+    fetch('http://localhost:7007/record/begin', {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: id }),
@@ -33,7 +33,7 @@ export default class Dashboard extends Component {
   }
 
   stopRecording = () => {
-    fetch('/record/end')
+    fetch('http://localhost:7007/record/end')
       .then(res => res.text())
       .then(string => console.log(string));
 
