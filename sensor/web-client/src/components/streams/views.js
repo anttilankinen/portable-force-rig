@@ -22,25 +22,34 @@ class Views extends Component {
 
   render() {
     const {view} = this.state;
-
+    console.log(view);
     if (view.readings) {
       const readings = JSON.parse(view.readings);
       chartData.labels = readings.map((value, index) => (index * 0.025).toFixed(3));
       chartData.datasets[0].data = readings;
     }
 
-    return (<div style={{
-        textAlign: 'center',
-        padding: '20px'
-      }}>
-      <h4>Status</h4>
-      <h4>{view.date_time}</h4>
-
-      <div><Line data={chartData} options={chartOptions} height={350}/></div>
+    return (<div>
       <div style={{
-          textAlign: 'right',
+          textAlign: 'left',
           padding: '20px'
-        }}></div>
+        }}>
+        <h3 >Date & Time : {view.date_time}</h3>
+        <h3>Size of ant : {view.ant_size}</h3>
+      </div>
+
+      <div style={{
+          textAlign: 'center',
+          padding: '20px'
+        }}>
+        <div>
+          <h4>Readings</h4>
+          <Line data={chartData} options={chartOptions} height={350}/></div>
+        <div style={{
+            textAlign: 'right',
+            padding: '20px'
+          }}></div>
+      </div>
     </div>)
   }
 

@@ -13,6 +13,7 @@ class History extends Component {
       this.setState({saved: history});
     });
   }
+
   deleteData = (id) => {
     const rowId = id;
     fetch(`/api/rpi/data/${rowId}/delete`, {
