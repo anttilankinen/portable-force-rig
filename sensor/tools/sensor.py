@@ -9,7 +9,6 @@ import argparse
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", default="data.txt")
-    parser.add_argument("--verbose", default=True)
     return parser.parse_args()
 
 
@@ -34,7 +33,6 @@ def read_device(out_file):
     global ZEROED
     global BIAS1
     global BIAS2
-    global OPT_VERBOSE
     timestamp = 1
 
     while THREAD_IS_RUN:
@@ -49,15 +47,15 @@ def read_device(out_file):
             # Here we read only 6 bytes from 128 to 133
         try:
             data1 = DEV_CTX.read_i2c_block_data(DEV1_ADDRESS, 0x00, 6)
-            data2 = DEV_CTX.read_i2c_block_data(DEV2_ADDRESS, 0x00, 6)
+#            data2 = DEV_CTX.read_i2c_block_data(DEV2_ADDRESS, 0x00, 6)
 
 
             frameindex1 = data1[0] << 8 | data1[1]
             timestamp1 = data1[2] << 8 | data1[3]
             value1 = (data1[4] << 8 | data1[5]) - 255
-            frameindex2 = data2[0] << 8 | data2[1]
-            timestamp2 = data2[2] << 8 | data2[3]
-            value2 = (data2[4] << 8 | data2[5]) - 255
+ #           frameindex2 = data2[0] << 8 | data2[1]
+  #          timestamp2 = data2[2] << 8 | data2[3]
+   #         value2 = (data2[4] << 8 | data2[5]) - 255
         except IOError as e: # frequent
             continue
 
@@ -67,25 +65,24 @@ def read_device(out_file):
         if value1 > 768: #out of bounds
             continue
 
-        if frameindex2 == 0xffff and timestamp2 == 0xffff: #i2c read error
-            continue
+    #    if frameindex2 == 0xffff and timestamp2 == 0xffff: #i2c read error
+     #       continue
 
-        if value2 > 768: #out of bounds
-            continue
+      #  if value2 > 768: #out of bounds
+       #     continue
 
         if ZEROED:
             value1 = value1 - BIAS1
-            value2 = value2 - BIAS2
+        #    value2 = value2 - BIAS2
         else:
             BIAS1 = value1
-            BIAS2 = value2
+         #   BIAS2 = value2
             value1 = 0
-            value2 = 0
+          #  value2 = 0
             ZEROED = True
 
-        out_file.write('%i, %i, %.2f\n' % (value1, value2, ELAPSED_TIME))
-        if OPT_VERBOSE:
-            print(value1, value2)
+        #out_file.write('%i, %i, %.2f\n' % (value1, value2, ELAPSED_TIME))
+        print(value1)
         time.sleep(INTERVAL / float(1000))
         ELAPSED_TIME = ELAPSED_TIME + INTERVAL
 
@@ -112,7 +109,6 @@ def stop_thread():
 if __name__ == '__main__':
     args = get_args()
     out_file = open(args.file, 'w')
-    OPT_VERBOSE = args.verbose
     try:
         DEV_CTX = smbus2.SMBus(DEV_BUS)
     except IOError as e:
