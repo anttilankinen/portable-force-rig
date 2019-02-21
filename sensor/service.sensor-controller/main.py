@@ -86,7 +86,7 @@ def read_devices(out_file):
             value2 = 0
             ZEROED = True
 
-        #out_file.write('%i, %i, %.2f\n' % (value1, value2, ELAPSED_TIME))
+        out_file.write('%i, %i, %.2f\n' % (value1, value2, ELAPSED_TIME))
 #        redis_client.publish('sensor-data', f'{value1}')
         time.sleep(INTERVAL / float(1000))
         ELAPSED_TIME = ELAPSED_TIME + INTERVAL
@@ -132,5 +132,12 @@ if __name__ == '__main__':
     except IOError as e:
         print(e.message)
         sys.exit(1)
-    start()
+    try:
+        
+        start()
+        while True:
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        out_file.close()
+
 #    app.run(host='0.0.0.0', port=80)
