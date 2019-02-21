@@ -22,7 +22,7 @@ if __name__ == '__main__':
             % (bus, old_address, new_address)) == 'y':
         try:
             DEV_CTX = smbus2.SMBus(bus)
-            DEV_CTX.write_i2c_block_data(old_address, 0x00, [0x02, 0x00, 0x01,
+            DEV_CTX.write_i2c_block_data(old_address, 0x02, [0x00, 0x01,
                 new_address, 0xff])
         except IOError as e:
             print(e.message)
