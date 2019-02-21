@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import {Line} from 'react-chartjs-2';
 import socketIOClient from 'socket.io-client';
-import {chartOptions, chartData} from '../chartSettings';
 
+import {chartOptions, chartData} from '../chartSettings';
+import AntSizeInput from '../AntSizeInput.js';
 export default class Dashboard extends Component {
   state = {
     current: [],
@@ -73,30 +74,39 @@ export default class Dashboard extends Component {
       <div style={{
           marginTop: '20px '
         }}>
-        {
-          !started && <button className="ui green button" onClick={this.startRecording}>
+        <AntSizeInput/>
+        <br/> {
+          !started && <button style={{
+                margin: '0.25em'
+              }} className="ui green button" onClick={this.startRecording}>
               <i className="play icon"></i>Start
             </button>
         }
         {
-          started && <button className="ui red button" onClick={this.stopRecording}>
+          started && <button style={{
+                margin: '0.25em'
+              }} className="ui red button" onClick={this.stopRecording}>
               <i className="stop icon"></i>Stop
             </button>
         }
-        <button className="ui yellow button" onClick={this.clearData} disabled={started}>
+        <button className="ui yellow button" style={{
+            margin: '0.25em'
+          }} onClick={this.clearData} disabled={started}>
           <i className="trash icon"></i>Clear
         </button>
-        <button className="ui blue button" onClick={this.saveData} disabled={started}>
+
+        <button style={{
+            margin: '0.25em'
+          }} className="ui blue button" onClick={this.saveData} disabled={started}>
           <i className="download icon"></i>Save
         </button>
-        <button className="ui brown button" onClick={this.uploadData}>
+        <button style={{
+            margin: '0.25em'
+          }} className="ui brown button" onClick={this.uploadData}>
           <i className="upload icon"></i>Upload
         </button>
       </div>
-      {/*
-<Calibrate />
-          */
-      }
+
     </div>);
   }
 }
