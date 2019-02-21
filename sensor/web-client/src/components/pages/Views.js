@@ -19,7 +19,6 @@ export default class Views extends Component {
 
   render() {
     const { view } = this.state;
-    console.log(view);
 
     if (view.readings) {
       const readings = JSON.parse(view.readings);
