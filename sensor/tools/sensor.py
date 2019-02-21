@@ -9,7 +9,7 @@ import argparse
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", default="data.txt")
-    parser.add_argument("--verbose", default=False)
+    parser.add_argument("--verbose", default=True)
     return parser.parse_args()
 
 
