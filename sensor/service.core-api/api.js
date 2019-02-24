@@ -36,7 +36,7 @@ router.post('/data', bodyParser, async (ctx, next) => {
   try {
     let now = new Date();
     const db = await dbPromise;
-    db.run('INSERT INTO database (id, date_time, ant_size, readings, file_name) VALUES (?, ?, ?, ?, ?)', [id, now.toLocaleString(), 'Large', dataString, fileName]);
+    db.run('INSERT INTO database (id, date_time, ant_size, readings, file_name) VALUES (?, ?, ?, ?, ?)', [id, now.toLocaleString(), ctx.request.body.antSize, dataString, fileName]);
     ctx.body = `Readings successfully saved to the database: ${dataString}`;
   } catch (err) {
     console.log(err);
