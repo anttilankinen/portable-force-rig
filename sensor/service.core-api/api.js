@@ -4,6 +4,7 @@ const bodyParser = require('koa-body')();
 const router = new Router();
 const api = new Koa();
 const uuidv4 = require('uuid/v4');
+const { exec } = require('child_process');
 
 const sqlite = require('sqlite');
 const dbPromise = sqlite.open('./data/readings.sqlite');
@@ -49,6 +50,16 @@ router.del('/data/:id/delete', async (ctx, next) => {
     db.run('DELETE FROM database WHERE id = ?', ctx.params.id, (err) => {
       if (err) return console.error(err.message);
     });
+
+    exec(`rm -f recordings/${ctx.params.id}.mp4`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error: ${error}`);
+        return;
+      }
+      console.log(`Stdout: ${stdout}`);
+      console.log(`Stderr: ${stderr}`);
+    });
+
     const rows = await db.all('SELECT * FROM database');
     ctx.body = { rows: rows };
   } catch (err) {
