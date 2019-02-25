@@ -2,14 +2,20 @@ import React, { Component } from 'react';
 import { Line } from 'react-chartjs-2';
 import socketIOClient from 'socket.io-client';
 import { chartOptions, chartData } from '../chartSettings';
+import AntSizeInput from '../AntSizeInput.js';
 import uuidv4 from 'uuid/v4';
 
 export default class Dashboard extends Component {
   state = {
+    antSize: '',
     current: [],
     currentId: null,
     started: false,
     status: 'Sensor ready!'
+  }
+
+  updateAntSize = (antSize) => {
+    this.setState({ antSize: antSize });
   }
 
   startRecording = () => {
@@ -46,9 +52,9 @@ export default class Dashboard extends Component {
   }
 
   saveData = () => {
-    const { current, currentId } = this.state;
+    const { antSize, current, currentId } = this.state;
     if (current && current.length) {
-      const JSONdata = JSON.stringify({ id: currentId, data: current });
+      const JSONdata = JSON.stringify({ id: currentId, antSize: antSize, data: current });
       fetch('/api/rpi/data', {
         method: 'post',
         headers: { 'Content-Type': 'application/json' },
@@ -74,15 +80,17 @@ export default class Dashboard extends Component {
   }
 
   render() {
-    const { current, started, status } = this.state;
-    chartData.labels = current.map((value, index) => (index * 0.025).toFixed(3));
-    chartData.datasets[0].data = current;
+    const { antSize, current, started, status } = this.state;
+    const display = current.splice(-500);
+    chartData.datasets[0].data = display;
+    chartData.labels = current.map((value, index) => (index * 0.025).toFixed(3)).splice(-500);
 
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
         <h4>{status}</h4>
         <div><Line data={chartData} options={chartOptions} height={350}/></div>
         <div style={{ margin: '20px 0 40px 0'}}>
+          <AntSizeInput antSize={antSize} handleChange={this.updateAntSize}/>
           {!started &&
             <button className="ui green button" onClick={this.startRecording}>
               <i className="play icon"></i>Start
