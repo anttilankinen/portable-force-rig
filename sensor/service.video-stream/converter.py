@@ -20,7 +20,7 @@ def convert(video, id):
 #Delete code
 def delete(video):
     #delete the temporary temp_video
-    command = 'rm ~/Repositories/portable-force-rig/sensor/service.video-stream/' + video
+    command = 'rm ~/' + video
     try:
         output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:

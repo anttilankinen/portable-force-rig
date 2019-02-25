@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Line } from 'react-chartjs-2';
 import socketIOClient from 'socket.io-client';
 import { chartOptions, chartData } from '../chartSettings';
-import AntSizeInput from '../AntSizeInput.js';
+import AntSizeInput from '../AntSizeInput';
 import uuidv4 from 'uuid/v4';
 
 export default class Dashboard extends Component {
@@ -81,9 +81,9 @@ export default class Dashboard extends Component {
 
   render() {
     const { antSize, current, started, status } = this.state;
-    const display = current.splice(-500);
+    const display = current.slice(-500);
     chartData.datasets[0].data = display;
-    chartData.labels = current.map((value, index) => (index * 0.025).toFixed(3)).splice(-500);
+    chartData.labels = current.map((value, index) => (index * 0.025).toFixed(3)).slice(-500);
 
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
@@ -108,7 +108,6 @@ export default class Dashboard extends Component {
             <i className="download icon"></i>Save
           </button>
         </div>
-        <img src="http://localhost:7007/stream.mjpg" alt="Video stream currently unavailable" width="640" height="480" />
       </div>
     );
   }

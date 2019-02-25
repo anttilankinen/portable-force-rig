@@ -59,6 +59,7 @@ def clip_buffer(id):
     camera.stop_recording(splitter_port=2)
     print('Clipping completed')
     converter.convert(clipname, id)
+    converter.delete(clipname)
 
 #Server paths and error checks
 class StreamingHandler(server.BaseHTTPRequestHandler):

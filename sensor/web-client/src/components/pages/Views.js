@@ -19,11 +19,13 @@ export default class Views extends Component {
 
   render() {
     const { view } = this.state;
+    let maxForce = 0;
 
     if (view.readings) {
       const readings = JSON.parse(view.readings);
       chartData.labels = readings.map((value, index) => (index * 0.025).toFixed(3));
       chartData.datasets[0].data = readings;
+      maxForce = Math.max(...JSON.parse(view.readings));
     }
 
     return (
@@ -31,7 +33,7 @@ export default class Views extends Component {
         <div style={{ textAlign: 'left', padding: '20px' }}>
           <h3>Date: {view.date_time}</h3>
           <h3>Ant size: {view.ant_size}</h3>
-          <h3>Max bite force: {Math.max(...JSON.parse(view.readings))}</h3>
+          <h3>Max bite force: {maxForce}</h3>
         </div>
         <div style={{ textAlign: 'center', padding: '20px' }}>
           <h4>Readings</h4>
