@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
-import { Line } from 'react-chartjs-2';
+import React, {Component} from 'react';
+import {Line} from 'react-chartjs-2';
 import socketIOClient from 'socket.io-client';
 
-import { chartOptions, chartData } from '../chartSettings';
+import {chartOptions, chartData} from '../chartSettings';
 import AntSizeInput from '../AntSizeInput.js';
 export default class Dashboard extends Component {
   state = {
@@ -11,19 +11,19 @@ export default class Dashboard extends Component {
   }
 
   startRecording = () => {
-    this.setState({ started: true });
+    this.setState({started: true});
     fetch('/api/sensor-controller/start').then(res => res.text()).then(string => console.log(string));
   }
 
   stopRecording = () => {
-    this.setState({ started: false });
+    this.setState({started: false});
     fetch('/api/sensor-controller/stop').then(res => res.text()).then(string => console.log(string));
   }
 
   saveData = () => {
-    const { current } = this.state;
-    if(current && current.length) {
-      const JSONdata = JSON.stringify({ data: current });
+    const {current} = this.state;
+    if (current && current.length) {
+      const JSONdata = JSON.stringify({data: current});
 
       fetch('/api/rpi/data', {
         method: 'post',
@@ -33,13 +33,13 @@ export default class Dashboard extends Component {
         body: JSONdata
       }).then(res => res.text()).then(string => {
         console.log(string);
-        this.setState({ current: [] });
+        this.setState({current: []});
       });
     }
   }
 
   clearData = () => {
-    this.setState({ current: [] });
+    this.setState({current: []});
   }
 
   uploadData = () => {
@@ -47,9 +47,9 @@ export default class Dashboard extends Component {
   }
 
   handleChangeAntInput(event, data) {
-    const { value } = data;
+    const {value} = data;
     console.log(value);
-    this.setState({ antsize: value });
+    this.setState({antsize: value});
   }
 
   componentDidMount() {
@@ -66,7 +66,7 @@ export default class Dashboard extends Component {
   }
 
   render() {
-    const { current, started } = this.state;
+    const {current, started} = this.state;
     console.log(current);
     chartData.labels = current.map((index) => (index * 0.025).toFixed(3));
     chartData.datasets[0].data = current;
@@ -79,8 +79,8 @@ export default class Dashboard extends Component {
       <div><Line data={chartData} options={chartOptions} height={350}/></div>
       <div style={{
           marginTop: '20px '
-        }}>
-        <AntSizeInput onChange={this.handleChangeAntInput.bind(this)}/>
+        }}><AntSizeInput onChange={this.handleChangeAntInput.bind(this)}/>
+
         <br/> {
           !started && <button style={{
                 margin: '0.25em'
