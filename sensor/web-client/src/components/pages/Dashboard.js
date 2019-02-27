@@ -72,11 +72,15 @@ export default class Dashboard extends Component {
   }
 
   componentDidMount() {
-    const socket = socketIOClient('http://localhost:7002');
-    socket.on('connected', message => console.log(message));
-    socket.on('new data', message => {
+    this.socket = socketIOClient('http://localhost:7002');
+    this.socket.on('connected', message => console.log(message));
+    this.socket.on('new data', message => {
       this.setState({ current: [...this.state.current, message.data] });
     });
+  }
+
+  componentWillUnmount() {
+    this.socket.close();
   }
 
   render() {
@@ -86,7 +90,7 @@ export default class Dashboard extends Component {
     chartData.labels = current.map((value, index) => (index * 0.025).toFixed(3)).slice(-500);
 
     return (
-      <div style={{ textAlign: 'center', padding: '20px' }}>
+      <div style={{ textAlign: 'center', padding: '20px', height: '400px', width: 'auto' }}>
         <h4>{status}</h4>
         <Line data={chartData} options={chartOptions} height={350}/>
         <div style={{ margin: '20px 0 40px 0'}}>

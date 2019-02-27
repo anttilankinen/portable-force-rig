@@ -31,14 +31,14 @@ export default class Views extends Component {
     return (
       <div>
         <div style={{ textAlign: 'left', padding: '20px' }}>
-          <h3>Date: {view.date_time}</h3>
-          <h3>Ant size: {view.ant_size}</h3>
-          <h3>Max bite force: {maxForce}</h3>
+          <h4>Date: {view.date_time}</h4>
+          <h4>Ant size: {view.ant_size}</h4>
+          <h4>Max bite force: {maxForce}</h4>
         </div>
-        <div style={{ textAlign: 'center', padding: '20px' }}>
+        <div style={{ textAlign: 'center', padding: '20px', height: '400px', width: 'auto' }}>
           <h4>Readings</h4>
-          <Line data={chartData} options={chartOptions} height={350}/>
-          <video src={`/recordings/${view.file_name}`} type="video/mp4" width="600" height="400" muted controls>
+          <Line data={chartData} options={chartOptions} height={400}/>
+          <video src={`/recordings/${view.file_name}`} type="video/mp4" width="600" height="400" muted controls style={{ padding: '40px'}}>
             Recording
           </video>
         </div>

@@ -36,7 +36,7 @@ export default class AntSizeInput extends Component {
         <h4>{this.state.status}</h4>
         <div style={{ margin: '20px 0' }}>
           <Select value={options.value} onChange={(event, {value}) => handleChange(value)} options={options} placeholder="Ant size"/>
-          <button className="ui button brown" onClick={this.handleSubmit}>Select</button>
+          <button className="ui button grey" onClick={this.handleSubmit}>Select</button>
         </div>
       </div>
     );

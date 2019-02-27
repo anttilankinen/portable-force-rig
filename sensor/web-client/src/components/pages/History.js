@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import Table from '../Table';
+import { Input } from 'semantic-ui-react';
 
 export default class History extends Component {
   state = {
     saved: [],
     status: '',
+    emailInput: null
   }
 
   uploadData = () => {
@@ -29,8 +31,18 @@ export default class History extends Component {
         antSize: row.ant_size,
         readings: row.readings
       }));
-      this.setState({saved: history});
+      this.setState({ saved: history });
     });
+  }
+
+  updateEmail = (email) => {
+    this.setState({ emailInput: email });
+  }
+
+  sendCSV = () => {
+    fetch(`/api/data-upload/csv?email=${this.state.emailInput}`)
+      .then(res => res.text())
+      .then(string => console.log(string));
   }
 
   componentDidMount() {
@@ -44,13 +56,18 @@ export default class History extends Component {
         readings: row.readings
       }));
       this.setState({ saved: history });
-    });
+    })
+    .catch(err => console.log(err));
   }
 
   render() {
     const { saved, status } = this.state;
     return (
       <div style={{ textAlign: 'center', padding: '30px' }}>
+        <Input onChange={(event, { value }) => this.updateEmail(value)} placeholder="Enter email"/>
+        <button className="ui green button" style={{ margin: '0.25em' }} onClick={this.sendCSV}>
+          <i className="file excel outline icon"></i>Export CSV
+        </button>
         <button className="ui brown button" onClick={this.uploadData}>
           <i className="upload icon"></i>Upload
         </button>
