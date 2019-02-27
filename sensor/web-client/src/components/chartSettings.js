@@ -5,6 +5,7 @@ export const chartOptions = {
   legend: {
     display: false
   },
+  responsive: true,
   maintainAspectRatio: false,
   scales: {
     yAxes: [{

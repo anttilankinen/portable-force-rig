@@ -88,7 +88,7 @@ export default class Dashboard extends Component {
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
         <h4>{status}</h4>
-        <div><Line data={chartData} options={chartOptions} height={350}/></div>
+        <Line data={chartData} options={chartOptions} height={350}/>
         <div style={{ margin: '20px 0 40px 0'}}>
           <AntSizeInput antSize={antSize} handleChange={this.updateAntSize}/>
           {!started &&

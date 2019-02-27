@@ -18,10 +18,10 @@ services:
     image: portable-force-rig/drawbridge:1.0
     env_file: ./.env
     container_name: service.api-gateway
-    volumes:
-      - ./service.api-gateway/config.yaml:/config/config.yaml
     ports:
       - 7001:80
+    volumes:
+      - ./service.api-gateway/config.yaml:/config/config.yaml
 
   service.event-bus:
     build: ./service.event-bus
@@ -45,9 +45,10 @@ services:
       - 7003:80
     volumes:
       - ./service.core-api:/usr/src/app
-      - ./data/readings.sqlite:/usr/src/app/data/readings.sqlite
-      - ./service.video-stream/recordings:/usr/src/app/recordings
       - /usr/src/app/node_modules
+      - type: bind
+        source: ./data/readings.sqlite
+        target: /usr/src/app/data/readings.sqlite
 
   service.sensor-controller:
     build: ./service.sensor-controller
@@ -60,7 +61,9 @@ services:
       - 7004:80
     volumes:
       - ./service.sensor-controller:/usr/src/app
-      - ./service.calibration/lookup.npy:/usr/src/app/lookup.npy
+      - type: bind
+        source: ./service.calibration/lookup.npy
+        target: /usr/src/app/lookup.npy
     privileged: true
 
 
@@ -73,7 +76,9 @@ services:
       - 7005:80
     volumes:
       - ./service.data-upload:/usr/src/app
-      - ./data/readings.sqlite:/usr/src/app/data/readings.sqlite
+      - type: bind
+        source: ./data/readings.sqlite
+        target: /usr/src/app/data/readings.sqlite
 
   # service.calibration:
   #   build: ./service.calibration
