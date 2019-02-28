@@ -11,20 +11,17 @@ from sklearn.preprocessing import PolynomialFeatures
 def get_args():
     parser = argparse.ArgumentParser()
     # filename of table, required as can mix between buses
-    parser.add_argument('-f', '--file', required=True) 
-    parser.add_argument('-v', '--verbose', default=False)
     # sensor bus
-    parser.add_argument('-s', '--sensor', required=True)
+    parser.add_argument('--address', required=True)
     return parser.parse_args()
 
 INTERVAL = 25 # in ms
 READ_THREAD = None
 THREAD_IS_RUN = False
-DEV1_BUS = 1
-DEV1_ADDRESS = 0x04
-DEV1_CTX = None
+DEV_BUS = 1
+DEV_CTX = None
 ZEROED = False
-BIAS1 = 0
+BIAS = 0
 train_data = None
 data_collected = 0
 
@@ -56,16 +53,15 @@ def calibration_function(train_data):
 
 def read_device(weight, datapoints=100):
     global THREAD_IS_RUN
-    global DEV1_ADDRESS
-    global DEV1_CTX
+    global DEV_ADDRESS
+    global DEV_CTX
     global ZEROED
-    global BIAS1
+    global BIAS
     global OPT_VERBOSE
     global train_data
     global data_collected
     timestamp = 1
     # clear up previously unused preallocated space from training data
-    train_data = train_data[data_collected - 1, :]
 
     # preallocated space for training data
     data_space = np.concatenate([np.zeros([datapoints,1]),
@@ -73,6 +69,7 @@ def read_device(weight, datapoints=100):
     if train_data is None:
         train_data = data_space
     else:
+        train_data = train_data[:data_collected, :]
         train_data = np.concatenate([train_data, data_space], axis=0)
 
     while THREAD_IS_RUN:
@@ -85,17 +82,13 @@ def read_device(weight, datapoints=100):
             # therefore simply read the default 32 bytes
             # of the sensor data region.
             # Here we read only 6 bytes from 128 to 133
-        try:
-            data1 = DEV1_CTX.read_i2c_block_data(DEV1_ADDRESS, 0x00, 6)
-            #data2 = DEV2_CTX.read_i2c_block_data(DEV2_ADDRESS, 0x00, 6)
 
+        try:
+            data1 = DEV_CTX.read_i2c_block_data(DEV_ADDRESS, 0x00, 6)
 
             frameindex1 = data1[0] << 8 | data1[1]
             timestamp1 = data1[2] << 8 | data1[3]
             value1 = (data1[4] << 8 | data1[5]) - 255
-            #frameindex2 = data2[0] << 8 | data2[1]
-            #timestamp2 = data2[2] << 8 | data2[3]
-            #value2 = (data2[4] << 8 | data2[5]) - 255
         except IOError as e: # frequent
             continue
 
@@ -105,32 +98,34 @@ def read_device(weight, datapoints=100):
         if value1 > 768: #out of bounds
             continue
 
-        #if frameindex2 == 0xffff and timestamp2 == 0xffff: #i2c read error
-        #    continue
-
-#        if value2 > 768: #out of bounds
-#            continue
-
         if ZEROED:
             value1 = value1 - BIAS1
-#            value2 = value2 - BIAS2
         else:
             BIAS1 = value1
-#            BIAS2 = value2
             value1 = 0
-#            value2 = 0
             ZEROED = True
+
         train_data[data_collected, 0] = value1
         data_collected = data_collected + 1
         time.sleep(INTERVAL / float(1000))
-
-        if OPT_VERBOSE:
-            print(value1)
+        print(value1)
 
 def start_thread(weight):
     global READ_THREAD
     global THREAD_IS_RUN
     global ELAPSED_TIME
+
+    # read some values, since the first read after connecting will be faulty
+    for i in range(5):
+        try:
+            data1 = DEV_CTX.read_i2c_block_data(DEV_ADDRESS, 0x00, 6)
+
+            frameindex1 = data1[0] << 8 | data1[1]
+            timestamp1 = data1[2] << 8 | data1[3]
+            value1 = (data1[4] << 8 | data1[5]) - 255
+        except IOError as e: # frequent
+            continue
+
 
     if READ_THREAD is None:
         ELAPSED_TIME = 0
@@ -149,30 +144,29 @@ def stop_thread():
 
 if __name__ == '__main__':
     args = get_args()
-    OPT_VERBOSE = args.verbose
+    DEV_ADDRESS = int(args.address, 0)
     try:
-        DEV1_CTX = smbus.SMBus(DEV1_BUS)
-        #DEV2_CTX = smbus.SMBus(DEV2_BUS)
+        DEV_CTX = smbus2.SMBus(DEV_BUS)
     except IOError as e:
         print (e.message)
         sys.exit(1)
 
-    input_string = 'Start calibration? [Y/n]'
+    input_string = 'Start calibration? [Y/n] '
     while input(input_string).lower() !=  'n':
-        input_string = 'Continue calibration? [Y/n]'
+        input_string = 'Continue calibration? [Y/n] '
         # first calibrate zero weight
         if ZEROED is False:
             input('Place the sensor on its side and remove any weight' +
                 ' from the sensor. Press enter to continue')
             weight = 0
         else:
-            weight = float(input('Enter weight (N)'))
+            weight = float(input('Enter weight (N) '))
 
         start_thread(weight)
         time.sleep(2)
         stop_thread()
         train_data = train_data[:data_collected, :]
+
     print('Computing look-up table')
     table = calibration_function(train_data)
-    np.save(args.file, table)
-    print('Look-up table saved as "%s"' % (args.file))
+    np.save(args.address, table)
