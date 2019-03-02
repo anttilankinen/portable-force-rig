@@ -17,8 +17,8 @@ apis:
     upstream_url: http://localhost:7006
     allow_cross_origin: true
 
-  service.data-upload:
-    name: Data Upload Service
-    prefix: api/data-upload
-    upstream_url: http://service.data-upload
+  service.cloud-db:
+    name: Cloud Database Service
+    prefix: api/cloud-db
+    upstream_url: http://service.cloud-db
     allow_cross_origin: true

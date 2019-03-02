@@ -66,16 +66,15 @@ services:
         target: /usr/src/app/lookup.npy
     privileged: true
 
-
-  service.data-upload:
-    build: ./service.data-upload
+  service.cloud-db:
+    build: ./service.cloud-db
     env_file: ./.env
-    image: portable-force-rig/service.data-upload:1.0
-    container_name: service.data-upload
+    image: portable-force-rig/service.cloud-db:1.0
+    container_name: service.cloud-db
     ports:
       - 7005:80
     volumes:
-      - ./service.data-upload:/usr/src/app
+      - ./service.cloud-db:/usr/src/app
       - type: bind
         source: ./data/readings.sqlite
         target: /usr/src/app/data/readings.sqlite

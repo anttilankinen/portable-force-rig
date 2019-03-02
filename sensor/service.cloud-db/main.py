@@ -1,7 +1,8 @@
 import os
+import csv
 import json
 import sqlite3
-from flask import Flask
+from flask import Flask, request
 from pymongo import MongoClient
 
 MLAB_DB = os.getenv('MLAB_DB')
@@ -33,7 +34,7 @@ def cleanDb():
     sqlite_conn.commit()
     sqlite_conn.close()
 
-def upload(documents):
+def uploadToCloud(documents):
 
     print('Connecting to MongoDB..')
     client = MongoClient(MLAB_HOST, MLAB_PORT)
@@ -47,7 +48,7 @@ def upload(documents):
     print('Closing connectiong to MongoDB..')
     client.close()
 
-def main():
+def upload():
 
     db_data = readDb()
 
@@ -67,7 +68,7 @@ def main():
 
     if documents:
         try:
-            upload(documents)
+            uploadToCloud(documents)
             cleanDb()
             print('Data upload complete!')
 
@@ -78,14 +79,49 @@ def main():
     else:
         print('Nothing to upload..')
 
+def create_csv():
+    print('Connecting to MongoDB..')
+    client = MongoClient(MLAB_HOST, MLAB_PORT)
+    db = client[MLAB_DB]
+    db.authenticate(MLAB_USER, MLAB_PASS)
+
+    try:
+        print('Retrieving documents from MongoDB database..')
+        readings = db['readings']
+        csv_file = open('temp.csv', 'w')
+        writer = csv.writer(csv_file)
+
+        writer.writerow(['Date Time', 'Ant Size', 'Force Readings'])
+        for document in readings.find():
+            writer.writerow([document['dateTime'], document['antSize'], *document['data']])
+
+        csv_file.close()
+        print('Closing connectiong to MongoDB..')
+        client.close()
+
+    except Exception as error:
+        print(error.message)
+        raise
+
+def send_email(email):
+    print('Sending email..')
+    os.remove('temp.csv')
+
 if __name__ == '__main__':
 
     app = Flask(__name__)
 
-    @app.route('/')
+    @app.route('/upload')
     def data_upload():
-        main()
+        upload()
         return 'Data upload complete!'
+
+    @app.route('/csv')
+    def email_csv():
+        email = request.args['email']
+        create_csv()
+        send_email(email)
+        return f'CSV sent to {email}!'
 
     @app.errorhandler(Exception)
     def unhandled_exception(err):

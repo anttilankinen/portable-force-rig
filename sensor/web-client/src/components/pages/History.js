@@ -10,7 +10,7 @@ export default class History extends Component {
   }
 
   uploadData = () => {
-    fetch('/api/data-upload/')
+    fetch('/api/cloud-db/upload')
     .then(res => res.text())
     .then(string => {
       console.log(string);
@@ -40,7 +40,7 @@ export default class History extends Component {
   }
 
   sendCSV = () => {
-    fetch(`/api/data-upload/csv?email=${this.state.emailInput}`)
+    fetch(`/api/cloud-db/csv?email=${this.state.emailInput}`)
       .then(res => res.text())
       .then(string => console.log(string));
   }
