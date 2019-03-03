@@ -69,7 +69,7 @@ def upload():
     if documents:
         try:
             uploadToCloud(documents)
-            cleanDb()
+            # cleanDb()
             print('Data upload complete!')
 
         except Exception as error:

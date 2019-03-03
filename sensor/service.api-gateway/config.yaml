@@ -7,7 +7,7 @@ apis:
 
   service.sensor-controller:
     name: Sensor Controller Service
-    prefix: api/sensor-controller
+    prefix: api/sensor
     upstream_url: http://service.sensor-controller
     allow_cross_origin: true
 

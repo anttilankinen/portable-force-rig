@@ -30,7 +30,7 @@ export default class Dashboard extends Component {
       this.setState({ currentId: id });
     });
 
-    fetch('/api/sensor-controller/start')
+    fetch('/api/sensor/start')
     .then(res => res.text())
     .then(string => {
       console.log(string);
@@ -43,7 +43,7 @@ export default class Dashboard extends Component {
       .then(res => res.text())
       .then(string => console.log(string));
 
-    fetch('/api/sensor-controller/stop')
+    fetch('/api/sensor/stop')
     .then(res => res.text())
     .then(string => {
       console.log(string);
