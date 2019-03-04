@@ -46,6 +46,7 @@ services:
     volumes:
       - ./service.core-api:/usr/src/app
       - /usr/src/app/node_modules
+      - ./service.video-stream/recordings:/usr/src/app/recordings
       - type: bind
         source: ./data/readings.sqlite
         target: /usr/src/app/data/readings.sqlite
