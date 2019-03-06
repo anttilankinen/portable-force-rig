@@ -105,7 +105,7 @@ def create_csv():
 
 def send_email(email):
     print('Sending email..')
-    os.remove('temp.csv')
+    # os.remove('temp.csv')
 
 if __name__ == '__main__':
 

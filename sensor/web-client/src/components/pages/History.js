@@ -14,7 +14,7 @@ export default class History extends Component {
     .then(res => res.text())
     .then(string => {
       console.log(string);
-      this.setState({ saved: [], status: 'Data uploaded successfully!' });
+      this.setState({ status: 'Data uploaded successfully!' });
     });
   }
 
