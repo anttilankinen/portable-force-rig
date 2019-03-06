@@ -52,7 +52,7 @@ export default class Calibrate extends Component {
     const { started, ready, count, weight, status } = this.state;
 
     return (
-      <div style={{ textAlign: 'center', padding: '30px' }}>
+      <div style={{ textAlign: 'center', padding: '20px' }}>
         <div style={{ margin: '20px 0'}}>
           {!started &&
             <button className="ui teal button" onClick={this.start}>

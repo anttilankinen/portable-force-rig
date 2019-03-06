@@ -66,9 +66,9 @@ export default class History extends Component {
   render() {
     const { saved, status, emailInput } = this.state;
     return (
-      <div style={{ textAlign: 'center', padding: '30px' }}>
+      <div style={{ textAlign: 'center', padding: '15px' }}>
         <Input onChange={(event, { value }) => this.updateEmail(value)} placeholder="Enter email" value={emailInput}/>
-        <button className="ui green button" style={{ margin: '0.25em' }} onClick={this.sendCSV}>
+        <button className="ui green button" style={{ margin: '5px' }} onClick={this.sendCSV}>
           <i className="file excel outline icon"></i>Export CSV
         </button>
         <button className="ui brown button" onClick={this.uploadData}>

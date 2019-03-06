@@ -24,7 +24,7 @@ const TableBody = props => {
         <td>{row.antSize}</td>
         <td>{Math.max(...JSON.parse(row.readings))}</td>
         <td>
-          <Link to={{ pathname:`/history/${row.id}` }} className="ui violet button" style={{ margin: '10px 0'}}>
+          <Link to={{ pathname:`/history/${row.id}` }} className="ui violet button" style={{ margin: '10px'}}>
             <i className="info circle icon"></i>View
           </Link>
           <button onClick={() => props.handleDelete(row.id)} className="ui red button">

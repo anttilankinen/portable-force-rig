@@ -35,7 +35,7 @@ export default class Views extends Component {
           <h4>Ant size: {view.ant_size}</h4>
           <h4>Max bite force: {maxForce}</h4>
         </div>
-        <div style={{ textAlign: 'center', padding: '20px', height: '400px', width: 'auto' }}>
+        <div style={{ textAlign: 'center', padding: '10px', height: '400px', width: 'auto' }}>
           <h4>Readings</h4>
           <Line data={chartData} options={chartOptions} height={400}/>
           <video src={`/recordings/${view.file_name}`} type="video/mp4" width="600" height="400" muted controls style={{ padding: '40px'}}>

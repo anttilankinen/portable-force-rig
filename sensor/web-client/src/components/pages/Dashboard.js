@@ -90,10 +90,10 @@ export default class Dashboard extends Component {
     chartData.labels = current.map((value, index) => (index * 0.025).toFixed(3)).slice(-500);
 
     return (
-      <div style={{ textAlign: 'center', padding: '20px', height: '400px', width: 'auto' }}>
+      <div style={{ textAlign: 'center', padding: '10px', height: '400px', width: 'auto' }}>
         <h4>{status}</h4>
         <Line data={chartData} options={chartOptions} height={350}/>
-        <div style={{ margin: '20px 0 40px 0'}}>
+        <div style={{ margin: '10px 0 40px 0'}}>
           <AntSizeInput antSize={antSize} handleChange={this.updateAntSize}/>
           {!started &&
             <button className="ui green button" onClick={this.startRecording}>
@@ -112,6 +112,9 @@ export default class Dashboard extends Component {
             <i className="download icon"></i>Save
           </button>
         </div>
+        <video src="http://localhost:7007/stream.mjpg" type="video/mp4" width="600" height="400" style={{ padding: '40px'}}>
+          Live preview
+        </video>
       </div>
     );
   }
