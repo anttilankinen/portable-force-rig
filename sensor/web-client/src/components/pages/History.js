@@ -6,7 +6,7 @@ export default class History extends Component {
   state = {
     saved: [],
     status: '',
-    emailInput: null
+    emailInput: ''
   }
 
   uploadData = () => {
@@ -42,7 +42,10 @@ export default class History extends Component {
   sendCSV = () => {
     fetch(`/api/cloud-db/csv?email=${this.state.emailInput}`)
       .then(res => res.text())
-      .then(string => console.log(string));
+      .then(string => {
+        console.log(string);
+        this.setState({ emailInput: '' });
+      });
   }
 
   componentDidMount() {
@@ -61,10 +64,10 @@ export default class History extends Component {
   }
 
   render() {
-    const { saved, status } = this.state;
+    const { saved, status, emailInput } = this.state;
     return (
       <div style={{ textAlign: 'center', padding: '30px' }}>
-        <Input onChange={(event, { value }) => this.updateEmail(value)} placeholder="Enter email"/>
+        <Input onChange={(event, { value }) => this.updateEmail(value)} placeholder="Enter email" value={emailInput}/>
         <button className="ui green button" style={{ margin: '0.25em' }} onClick={this.sendCSV}>
           <i className="file excel outline icon"></i>Export CSV
         </button>
