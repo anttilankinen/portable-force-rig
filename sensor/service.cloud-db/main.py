@@ -4,6 +4,12 @@ import json
 import sqlite3
 from flask import Flask, request
 from pymongo import MongoClient
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
+from email.utils import COMMASPACE
+from email import encoders
 
 MLAB_DB = os.getenv('MLAB_DB')
 MLAB_HOST = os.getenv('MLAB_HOST')
@@ -103,9 +109,43 @@ def create_csv():
         print(error.message)
         raise
 
-def send_email(email):
-    print('Sending email..')
-    # os.remove('temp.csv')
+def send_email(to_email):
+    print('Crafting email..')
+
+    SUBJECT = 'Portable Force Rig Data'
+    FILENAME = 'temp.csv'
+    FILEPATH = './temp.csv'
+    FROM_EMAIL = os.getenv('EMAIL_ACC')
+    EMAIL_PWD = os.getenv('EMAIL_PWD')
+    TO_EMAIL = to_email
+    SMTP_SERVER = 'smtp.gmail.com'
+    SMTP_PORT = 587
+
+    msg = MIMEMultipart()
+    msg['From'] = FROM_EMAIL
+    msg['To'] = COMMASPACE.join([TO_EMAIL])
+    msg['Subject'] = SUBJECT
+
+    part = MIMEBase('application', 'octet-stream')
+    part.set_payload(open(FILEPATH, 'rb').read())
+    encoders.encode_base64(part)
+    part.add_header('Content-Disposition', 'attachment', filename=FILENAME)
+    msg.attach(part)
+
+    try:
+        print('Sending email..')
+        smtpserver = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        smtpserver.ehlo()
+        smtpserver.starttls()
+        smtpserver.login(FROM_EMAIL, EMAIL_PWD)
+        smtpserver.sendmail(FROM_EMAIL, TO_EMAIL, msg.as_string())
+        smtpserver.quit()
+
+    except Exception as err:
+        print(err)
+
+    finally:
+        os.remove('temp.csv')
 
 if __name__ == '__main__':
 
