@@ -2,6 +2,7 @@ import threading
 import smbus2
 import sys
 import time
+import json
 import numpy as np
 from flask import Flask, request
 from flask_cors import CORS
@@ -136,6 +137,7 @@ def create_lookup():
 
     print('Computing look-up table..')
     table = calibration_function(train_data)
+    np.save('./train_data', train_data)
     np.save('./lookup', table)
     print('Look-up table created!')
 
@@ -146,6 +148,10 @@ def create_lookup():
     print('Calibration done!')
 
     return 'Calibration done!'
+
+@app.route('/calibration/show')
+def show_calibration():
+    return { 'calibration': json.dumps(train_data.tolist()) }
 
 if __name__ == '__main__':
     try:
