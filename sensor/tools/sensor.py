@@ -2,17 +2,17 @@
 import sys
 import time
 import threading
-import smbus2
 import argparse
 import numpy as np
+import smbus2
 
 def get_args():
+    """some command line arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", default="data.txt")
     parser.add_argument("--calibrated", default=False)
     parser.add_argument("--address1", default=0x04)
     parser.add_argument("--address2", default=0x04)
-    
     return parser.parse_args()
 
 
@@ -34,10 +34,8 @@ def read_device(out_file):
     global ZEROED
     global BIAS1
     global lookup_table
-    timestamp = 1
 
     while THREAD_IS_RUN:
-        value, frameindex = 0, 0
 
             # SingleTac manual section 2.4.3 I2C Read Operation:
             # Where a Read operation is not preceded by a Read Request
@@ -175,7 +173,7 @@ if __name__ == '__main__':
         if DEV1_ADDRESS == DEV2_ADDRESS:
             lookup_table2 = np.load(args.address2)
             lookup_table = np.concatenate([lookup_table, lookup_table2],
-                    axis=1)
+                                          axis=1)
     else:
         lookup_table = None
 

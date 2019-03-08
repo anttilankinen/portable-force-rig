@@ -131,7 +131,7 @@ def start_thread(weight):
         ELAPSED_TIME = 0
         THREAD_IS_RUN = True
         READ_THREAD = threading.Thread(target=read_device,
-            args=(weight,))
+                                       args=(weight,))
         READ_THREAD.start()
 
 def stop_thread():
