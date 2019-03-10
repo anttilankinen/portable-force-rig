@@ -5,6 +5,7 @@ import smbus2
 import sys
 import time
 import numpy as np
+from scipy.interpolate import UnivariateSpline
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 
@@ -25,31 +26,39 @@ BIAS = 0
 train_data = None
 data_collected = 0
 
-def calibration_function(train_data):
+def calibration_function(train_data, method='cubic'):
     # compute calibration mapping using polynomial regression
+    # args: N-by-2 array of training data
+    # keywords: calibration function (cubic polynomial regression or
+    # smoothing spline
     
     x = train_data[:,0]
     y = train_data[:,1]
     valid = np.where(x != -255)
     x = x[valid].reshape(-1, 1)
-    # transform to polynomial features
-    poly = PolynomialFeatures(degree=3, include_bias=False)
-    x = poly.fit_transform(x)
-    
     y = y[valid].reshape(-1, 1)
+    test_input = np.arange(769).reshape(-1, 1)
 
-    lm = LinearRegression(fit_intercept=False).fit(x, y)
+    if method == 'cubic': # use cubic polynomial regression
+        # transform to polynomial features
+        poly = PolynomialFeatures(degree=3, include_bias=False)
+        x = poly.fit_transform(x)
     
-    # look-up table
-    input = np.arange(769).reshape(-1, 1)
-    poly_input = poly.fit_transform(input)
-    # look-up table is just an array which can be used just by the index as
-    # input is integer-valued
-    lookup_table = lm.predict(poly_input)
-
+        lm = LinearRegression(fit_intercept=False).fit(x, y)
+    
+        # look-up table
+        poly_input = poly.fit_transform(test_input)
+        # look-up table is just an array which can be used just by the index as
+        # input is integer-valued
+        lookup_table = lm.predict(poly_input)
+    else if method == 'spline': # use a cubic smoothing spline
+        spl = UnivariateSpline(x, y)
+        spl.set_smoothing_factor(0.5)
+        lookup_table = spl(test_input)
+    else:
+        print('Incorrect calibration method specified, use "cubic" or "spline"')
+        return np.empty([1]) # return this so rest doesn't crash
     return lookup_table
-
-
 
 def read_device(weight, datapoints=100):
     global THREAD_IS_RUN
