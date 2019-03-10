@@ -27,10 +27,10 @@ train_data = None
 data_collected = 0
 
 def calibration_function(train_data, method='cubic'):
-    # compute calibration mapping using polynomial regression
-    # args: N-by-2 array of training data
-    # keywords: calibration function (cubic polynomial regression or
-    # smoothing spline
+    """ compute calibration mapping using polynomial regression
+    args: N-by-2 array of training data
+    keywords: calibration function (cubic polynomial regression or
+    smoothing spline """
     
     x = train_data[:,0]
     y = train_data[:,1]
@@ -51,7 +51,7 @@ def calibration_function(train_data, method='cubic'):
         # look-up table is just an array which can be used just by the index as
         # input is integer-valued
         lookup_table = lm.predict(poly_input)
-    else if method == 'spline': # use a cubic smoothing spline
+    elif method == 'spline': # use a cubic smoothing spline
         spl = UnivariateSpline(x, y)
         spl.set_smoothing_factor(0.5)
         lookup_table = spl(test_input)
