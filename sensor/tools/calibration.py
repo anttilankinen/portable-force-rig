@@ -108,9 +108,9 @@ def read_device(weight, datapoints=100):
             continue
 
         if ZEROED:
-            value1 = value1 - BIAS1
+            value1 = value1 - BIAS
         else:
-            BIAS1 = value1
+            BIAS = value1
             value1 = 0
             ZEROED = True
 
@@ -169,7 +169,8 @@ if __name__ == '__main__':
                 ' from the sensor. Press enter to continue')
             weight = 0
         else:
-            weight = float(input('Enter weight (N) '))
+            weight = float(input('Enter weight (g) '))
+            weight = 0.00981 * weight
 
         start_thread(weight)
         time.sleep(2)
