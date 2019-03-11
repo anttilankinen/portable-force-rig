@@ -9,10 +9,11 @@ import smbus2
 def get_args():
     """some command line arguments"""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--file", default="data.txt")
-    parser.add_argument("--calibrated", default=False)
-    parser.add_argument("--address1", default=0x04)
-    parser.add_argument("--address2", default=0x04)
+    parser.add_argument('--file', default='data.txt')
+    parser.add_argument('--calibrated', default=False)
+    parser.add_argument('--address1', default=0x04)
+    parser.add_argument('--address2', default=0x04)
+    parser.add_argument('--size', default=None)
     return parser.parse_args()
 
 
@@ -169,9 +170,12 @@ if __name__ == '__main__':
     DEV2_ADDRESS = int(args.address2, 0)
 
     if args.calibrated:
-        lookup_table = np.load(args.address1)
-        if DEV1_ADDRESS == DEV2_ADDRESS:
-            lookup_table2 = np.load(args.address2)
+        if args.size is None:
+            print('Must specify ant size for calibration')
+            sys.exit(1)
+        lookup_table = np.load(args.address1 + args.size)
+        if DEV1_ADDRESS != DEV2_ADDRESS:
+            lookup_table2 = np.load(args.address2 + args.size)
             lookup_table = np.concatenate([lookup_table, lookup_table2],
                                           axis=1)
     else:

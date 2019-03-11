@@ -14,6 +14,7 @@ def get_args():
     # filename of table, required as can mix between buses
     # sensor bus
     parser.add_argument('--address', required=True)
+    parser.add_argument('--size', required=True)
     return parser.parse_args()
 
 INTERVAL = 25 # in ms
@@ -179,5 +180,5 @@ if __name__ == '__main__':
 
     print('Computing look-up table')
     table = calibration_function(train_data)
-    np.save(args.address, table)
-    np.save('train_data_' + args.address, train_data)
+    np.save(args.address + args.size, table)
+    np.save('train_data_' + args.address + '_' + args.size, train_data)
