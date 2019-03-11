@@ -165,7 +165,7 @@ def stop_thread():
 
 if __name__ == '__main__':
     args = get_args()
-    out_file = open(args.file, 'w')
+    out_file = open(str(int(time.time())) + '.txt', 'w')
     DEV1_ADDRESS = int(args.address1, 0)
     DEV2_ADDRESS = int(args.address2, 0)
 
