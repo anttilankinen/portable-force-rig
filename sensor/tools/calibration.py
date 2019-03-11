@@ -180,3 +180,4 @@ if __name__ == '__main__':
     print('Computing look-up table')
     table = calibration_function(train_data)
     np.save(args.address, table)
+    np.save('train_data_' + args.address, train_data)
