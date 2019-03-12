@@ -62,20 +62,20 @@ def read_devices():
             ZEROED = True
 
         if lookup_table1 is not None:
-            if value1 > 768: # out of bounds
+            if value1 >= len(lookup_table1): # out of bounds
                 value1 = lookup_table1[-1, 0]
                 print('Sensor 1 out of bounds')
             else:
                 value1 = lookup_table1[value1, 0]
 
         if lookup_table2 is not None:
-            if value2 > 768: # out of bounds
-                value2 = lookup_table2[-1, 1]
+            if value2 >= len(lookup_table2): # out of bounds 
+                value2 = lookup_table2[-1, 0]
                 print('Sensor 2 out of bounds')
             else:
-                value2 = lookup_table2[value2, 1]
+                value2 = lookup_table2[value2, 0]
 
-        average = value1[0] + value2[0]
+        average = (value1[0] + value2[0]) / 2
         redis_client.publish('sensor-data', "{:.3f}".format(average))
         time.sleep(INTERVAL / float(1000))
         ELAPSED_TIME = ELAPSED_TIME + INTERVAL

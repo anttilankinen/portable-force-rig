@@ -6,6 +6,7 @@ import json
 import numpy as np
 from flask import Flask, request
 from flask_cors import CORS
+from scipy.interpolate import InterpolatedUnivariateSpline
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 
@@ -34,7 +35,7 @@ def filter_data(dataset):
         out[i, 1] = value
     return out
 
-def calibration_function(train_data, method='cubic'):
+def calibration_function(train_data, method='spline'):
     # compute calibration mapping using polynomial regression
     train_data = filter_data(train_data)
     x = train_data[:,0].reshape(-1, 1)
