@@ -15,46 +15,57 @@ CORS(app)
 INTERVAL = 25 # in ms
 READ_THREAD = None
 THREAD_IS_RUN = False
-DEV1_BUS = 1
-DEV1_ADDRESS = 0x06
-DEV1_CTX = None
+DEV_BUS = 1
+DEV_CTX = None
 ZEROED = False
-BIAS1 = 0
+BIAS = 0
+CURRENT_ADDRESS = None
+CURRENT_SIZE = None
 train_data = None
 data_collected = 0
 
-def calibration_function(train_data):
+def filter_data(dataset):
+   # separate different values
+    unique_values = np.unique(dataset[:, 1])
+    out = np.ndarray([len(unique_values), 2])
+    for i, value in enumerate(unique_values):
+        input_subset = dataset[dataset[:, 1] == value, 0]
+        out[i, 0] = np.median(input_subset)
+        out[i, 1] = value
+    return out
+
+def calibration_function(train_data, method='cubic'):
     # compute calibration mapping using polynomial regression
-    x = train_data[:,0]
-    y = train_data[:,1]
-    valid = np.where(x != -255)
-    x = x[valid].reshape(-1, 1)
-    # transform to polynomial features
-    poly = PolynomialFeatures(degree=3, include_bias=False)
-    x = poly.fit_transform(x)
+    train_data = filter_data(train_data)
+    x = train_data[:,0].reshape(-1, 1)
+    y = train_data[:,1].reshape(-1, 1)
+    test_input = np.arange(np.max(x)).reshape(-1, 1)
 
-    y = y[valid].reshape(-1, 1)
+    if method == 'cubic': # use cubic polynomial regression
+        # transform to polynomial features
+        poly = PolynomialFeatures(degree=3, include_bias=False)
+        x = poly.fit_transform(x)
 
-    lm = LinearRegression(fit_intercept=False).fit(x, y)
+        lm = LinearRegression(fit_intercept=False).fit(x, y)
 
-    # look-up table
-    input = np.arange(769).reshape(-1, 1)
-    poly_input = poly.fit_transform(input)
-    # look-up table is just an array which can be used just by the index as
-    # input is integer-valued
-    lookup_table = lm.predict(poly_input)
-
+        # look-up table
+        poly_input = poly.fit_transform(test_input)
+        # look-up table is just an array which can be used just by the index as
+        # input is integer-valued
+        lookup_table = lm.predict(poly_input)
+    elif method == 'spline': # use a cubic smoothing spline
+        spl = InterpolatedUnivariateSpline(x, y, k=min(3, len(x) - 1))
+        lookup_table = spl(test_input)
+    else:
+        print('Incorrect calibration method specified, use "cubic" or "spline"')
+        return np.empty([1]) # return this so rest doesn't crash
     return lookup_table
 
 def read_device(weight, datapoints=100):
-    global THREAD_IS_RUN
-    global DEV1_ADDRESS
-    global DEV1_CTX
     global ZEROED
-    global BIAS1
+    global BIAS
     global train_data
     global data_collected
-    timestamp = 1
 
     # preallocated space for training data
     data_space = np.concatenate([np.zeros([datapoints,1]),
@@ -70,7 +81,7 @@ def read_device(weight, datapoints=100):
     while THREAD_IS_RUN:
         value1, frameindex1 = 0, 0
         try:
-            data1 = DEV1_CTX.read_i2c_block_data(DEV1_ADDRESS, 0x00, 6)
+            data1 = DEV_CTX.read_i2c_block_data(CURRENT_ADDRESS, 0x00, 6)
             frameindex1 = data1[0] << 8 | data1[1]
             timestamp1 = data1[2] << 8 | data1[3]
             value1 = (data1[4] << 8 | data1[5]) - 255
@@ -85,10 +96,10 @@ def read_device(weight, datapoints=100):
             continue
 
         if ZEROED:
-            value1 = value1 - BIAS1
+            value1 = value1 - BIAS
 
         else:
-            BIAS1 = value1
+            BIAS = value1
             value1 = 0
             ZEROED = True
 
@@ -100,17 +111,36 @@ def read_device(weight, datapoints=100):
 def calibrate():
     global READ_THREAD
     global THREAD_IS_RUN
-    global ELAPSED_TIME
+    global CURRENT_ADDRESS
+    global CURRENT_SIZE
     global train_data
 
     data = request.get_json()
+
+    if data is not None and CURRENT_ADDRESS is None:
+        CURRENT_ADDRESS = data['address']
+
+    if data is not None and CURRENT_SIZE is None:
+        CURRENT_SIZE = data['size']
+
+    # read some values, since the first read after connecting will be faulty
+    for i in range(5):
+        try:
+            data1 = DEV_CTX.read_i2c_block_data(CURRENT_ADDRESS, 0x00, 6)
+            frameindex1 = data1[0] << 8 | data1[1]
+            timestamp1 = data1[2] << 8 | data1[3]
+            value1 = (data1[4] << 8 | data1[5]) - 255
+
+        except IOError as e: # frequent
+            continue
+
+    weight = 0.00981 * data['weight']
     # if sensor not started
     if data is not None and READ_THREAD is None:
-        print('Calibrating for weight: ' + str(data['weight']))
+        print('Calibrating for weight: ' + str(weight))
         # start reading from sensor
-        ELAPSED_TIME = 0
         THREAD_IS_RUN = True
-        READ_THREAD = threading.Thread(target=read_device, args=(data['weight'],))
+        READ_THREAD = threading.Thread(target=read_device, args=(weight,))
         READ_THREAD.start()
 
         # stop reading from sensor
@@ -118,9 +148,6 @@ def calibrate():
         print('Finishing..')
         THREAD_IS_RUN = False
         READ_THREAD.join()
-        READ_THREAD = None
-
-        # calibrate
         train_data = train_data[:data_collected, :]
         return 'Ready for next weight..'
     return 'Calibration already started..'
@@ -128,7 +155,9 @@ def calibrate():
 @app.route('/calibration/end')
 def create_lookup():
     global ZEROED
-    global BIAS1
+    global BIAS
+    global CURRENT_ADDRESS
+    global CURRENT_SIZE
     global train_data
     global data_collected
 
@@ -136,17 +165,17 @@ def create_lookup():
         return 'Nothing to be calibrated'
 
     print('Computing look-up table..')
-    table = calibration_function(train_data)
-    np.save('./train_data', train_data)
-    np.save('./lookup', table)
+    np.save(f'./lookup/{CURRENT_ADDRESS}_{CURRENT_SIZE}', calibration_function(train_data))
+    np.save(f'./train_data/{CURRENT_ADDRESS}_{CURRENT_SIZE}', train_data)
     print('Look-up table created!')
 
+    CURRENT_ADDRESS = None
+    CURRENT_SIZE = None
     ZEROED = False
-    BIAS1 = 0
+    BIAS = 0
     train_data = None
     data_collected = 0
     print('Calibration done!')
-
     return 'Calibration done!'
 
 @app.route('/calibration/show')
@@ -155,7 +184,7 @@ def show_calibration():
 
 if __name__ == '__main__':
     try:
-        DEV1_CTX = smbus2.SMBus(DEV1_BUS)
+        DEV_CTX = smbus2.SMBus(DEV_BUS)
 
     except IOError as e:
         print(e.message)

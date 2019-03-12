@@ -63,8 +63,8 @@ services:
     volumes:
       - ./service.sensor-controller:/usr/src/app
       - type: bind
-        source: ./service.calibration/lookup.npy
-        target: /usr/src/app/lookup.npy
+        source: ./service.calibration/lookup
+        target: /usr/src/app/lookup
     privileged: true
 
   service.cloud-db:
