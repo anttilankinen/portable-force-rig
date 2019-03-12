@@ -34,7 +34,7 @@ def read_device(out_file):
     global DEV_CTX
     global ZEROED
     global BIAS1
-    global lookup_table
+    global lookup_table1
 
     while THREAD_IS_RUN:
 
@@ -61,12 +61,12 @@ def read_device(out_file):
             value1 = 0
             ZEROED = True
 
-        if lookup_table is not None:
+        if lookup_table1 is not None:
             if value1 > 768: #out of bounds
-                value1 = lookup_table[-1, 0]
+                value1 = lookup_table1[-1, 0]
                 print('Warning: out of bounds')
             else:
-                value1 = lookup_table[value1, 0]
+                value1 = lookup_table1[value1, 0]
 
         out_file.write('%i, %.2f\n' % (value1, ELAPSED_TIME))
         print(value1)
@@ -82,7 +82,8 @@ def read_devices(out_file):
     global ZEROED
     global BIAS1
     global BIAS2
-    global lookup_table
+    global lookup_table1
+    global lookup_table2
     timestamp = 1
 
     while THREAD_IS_RUN:
@@ -119,16 +120,16 @@ def read_devices(out_file):
             ZEROED = True
 
         if lookup_table is not None:
-            if value1 > 768: # out of bounds
-                value1 = lookup_table[-1, 0]
+            if value1 > len(lookup_table1) - 1: # out of bounds
+                value1 = lookup_table1[-1, 0]
                 print('Sensor 1 out of bounds')
             else:
-                value1 = lookup_table[value1, 0]
-            if value2 > 768: # out of bounds
-                value2 = lookup_table[-1, 1]
+                value1 = lookup_table1[value1, 0]
+            if value2 > len(lookup_table) - 1: # out of bounds
+                value2 = lookup_table2[-1, 0]
                 print('Sensor 2 out of bounds')
             else:
-                value2 = lookup_table2[value2, 1]
+                value2 = lookup_table2[value2, 0]
 
         out_file.write('%i, %i, %.2f\n' % (value1, value2, ELAPSED_TIME))
         print(value1, value2)
@@ -173,13 +174,11 @@ if __name__ == '__main__':
         if args.size is None:
             print('Must specify ant size for calibration')
             sys.exit(1)
-        lookup_table = np.load(args.address1 + args.size)
+        lookup_table1 = np.load(args.address1 + args.size)
         if DEV1_ADDRESS != DEV2_ADDRESS:
             lookup_table2 = np.load(args.address2 + args.size)
-            lookup_table = np.concatenate([lookup_table, lookup_table2],
-                                          axis=1)
     else:
-        lookup_table = None
+        lookup_table1 = None
 
     try:
         DEV_CTX = smbus2.SMBus(DEV_BUS)
