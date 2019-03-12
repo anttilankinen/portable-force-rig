@@ -5,7 +5,7 @@ import smbus2
 import sys
 import time
 import numpy as np
-from scipy.interpolate import UnivariateSpline
+from scipy.interpolate import InterpolatedUnivariateSpline
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 
@@ -15,6 +15,7 @@ def get_args():
     # sensor bus
     parser.add_argument('--address', required=True)
     parser.add_argument('--size', required=True)
+    parser.add_argument('--method', default='spline')
     return parser.parse_args()
 
 INTERVAL = 25 # in ms
@@ -27,18 +28,30 @@ BIAS = 0
 train_data = None
 data_collected = 0
 
+def filter_data(dataset):
+    """
+        take median values for each weight in dataset
+        this leads to faster computation and less optimisation for erroneous
+        values
+    """
+   # separate different values
+    unique_values = np.unique(dataset[:, 1])
+    out = np.ndarray([len(unique_values), 2])
+    for i, value in enumerate(unique_values):
+        input_subset = dataset[dataset[:, 1] == value, 0]
+        out[i, 0] = np.median(input_subset)
+        out[i, 1] = value
+    return out
+
 def calibration_function(train_data, method='cubic'):
     """ compute calibration mapping using polynomial regression
     args: N-by-2 array of training data
     keywords: calibration function (cubic polynomial regression or
     smoothing spline """
-    
-    x = train_data[:,0]
-    y = train_data[:,1]
-    valid = np.where(x != -255)
-    x = x[valid].reshape(-1, 1)
-    y = y[valid].reshape(-1, 1)
-    test_input = np.arange(769).reshape(-1, 1)
+    train_data = filter_data(train_data)
+    x = train_data[:,0].reshape(-1, 1)
+    y = train_data[:,1].reshape(-1, 1)
+    test_input = np.arange(np.max(x)).reshape(-1, 1)
 
     if method == 'cubic': # use cubic polynomial regression
         # transform to polynomial features
@@ -53,8 +66,7 @@ def calibration_function(train_data, method='cubic'):
         # input is integer-valued
         lookup_table = lm.predict(poly_input)
     elif method == 'spline': # use a cubic smoothing spline
-        spl = UnivariateSpline(x, y)
-        spl.set_smoothing_factor(0.5)
+        spl = InterpolatedUnivariateSpline(x, y, k=min(3, len(x) - 1))
         lookup_table = spl(test_input)
     else:
         print('Incorrect calibration method specified, use "cubic" or "spline"')
@@ -179,6 +191,6 @@ if __name__ == '__main__':
         train_data = train_data[:data_collected, :]
 
     print('Computing look-up table')
-    table = calibration_function(train_data)
+    table = calibration_function(train_data, args.method)
     np.save(args.address + args.size, table)
     np.save('train_data_' + args.address + '_' + args.size, train_data)
