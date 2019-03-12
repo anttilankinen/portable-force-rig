@@ -5,17 +5,17 @@ const options = [
   {
     key: 's',
     text: 'Small',
-    value: 'Small'
+    value: 'small'
   },
   {
     key: 'm',
     text: 'Medium',
-    value: 'Medium'
+    value: 'medium'
   },
   {
     key: 'l',
     text: 'Large',
-    value: 'Large'
+    value: 'large'
   }
 ];
 
@@ -35,7 +35,7 @@ export default class AntSizeInput extends Component {
       <div>
         <h4>{this.state.status}</h4>
         <div style={{ margin: '20px 0' }}>
-          <Select value={options.value} onChange={(event, {value}) => handleChange(value)} options={options} placeholder="Ant size"/>
+          <Select defaultValue={options[2].text} value={options.value} onChange={(event, {value}) => handleChange(value)} options={options} placeholder="Ant size"/>
           <button className="ui button grey" onClick={this.handleSubmit}>Select</button>
         </div>
       </div>

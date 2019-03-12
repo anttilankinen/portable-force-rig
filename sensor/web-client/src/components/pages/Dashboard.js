@@ -7,7 +7,7 @@ import uuidv4 from 'uuid/v4';
 
 export default class Dashboard extends Component {
   state = {
-    antSize: '',
+    antSize: 'large',
     current: [],
     currentId: null,
     started: false,
@@ -30,7 +30,11 @@ export default class Dashboard extends Component {
       this.setState({ currentId: id });
     });
 
-    fetch('/api/sensor/start')
+    fetch('/api/sensor/start', {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ size: this.state.antSize }),
+    })
     .then(res => res.text())
     .then(string => {
       console.log(string);
