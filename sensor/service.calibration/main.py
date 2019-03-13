@@ -119,7 +119,10 @@ def calibrate():
     data = request.get_json()
 
     if data is not None and CURRENT_ADDRESS is None:
-        CURRENT_ADDRESS = data['address']
+        if data['sensor'] == 1:
+            CURRENT_ADDRESS = 0x05
+        else:
+            CURRENT_ADDRESS = 0x06
 
     if data is not None and CURRENT_SIZE is None:
         CURRENT_SIZE = data['size']

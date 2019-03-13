@@ -1,31 +1,27 @@
 import React, { Component } from 'react';
 import { Select } from 'semantic-ui-react';
 
+
 const options = [
   {
-    key: 's',
-    text: 'Small',
-    value: 'Small'
+    key: 1,
+    text: 'Sensor 1 (L)',
+    value: 1
   },
   {
-    key: 'm',
-    text: 'Medium',
-    value: 'Medium'
-  },
-  {
-    key: 'l',
-    text: 'Large',
-    value: 'Large'
+    key: 2,
+    text: 'Sensor 2 (R)',
+    value: 2
   }
 ];
 
-export default class AntSizeInput extends Component {
+export default class SensorInput extends Component {
   state = {
-    status: 'Select ant size before starting'
+    status: 'Select sensor to calibrate'
   }
 
   handleSubmit = () => {
-    this.setState({ status: `Selected ant size: ${this.props.antSize}` });
+    this.setState({ status: `Selected sensor: ${this.props.sensor}` });
   }
 
   render() {
@@ -36,11 +32,11 @@ export default class AntSizeInput extends Component {
         <h4>{this.state.status}</h4>
         <div style={{ margin: '20px 0' }}>
           <Select
-            defaultValue={'Large'}
+            defaultValue={1}
             value={options.value}
             onChange={(event, {value}) => handleChange(value)}
             options={options}
-            placeholder="Ant size"
+            placeholder="Sensor selection"
           />
           <button className="ui button grey" onClick={this.handleSubmit}>Select</button>
         </div>

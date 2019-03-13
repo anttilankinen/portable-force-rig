@@ -8,8 +8,8 @@ import numpy as np
 import sys
 
 REDIS_PORT = int(os.getenv('REDIS_PORT'))
-DEV1_ADDRESS = os.getenv('DEV1_ADDRESS')
-DEV2_ADDRESS = os.getenv('DEV2_ADDRESS')
+DEV1_ADDRESS = 0x05
+DEV2_ADDRESS = 0x06
 
 app = Flask(__name__)
 redis_client = redis.StrictRedis(host='redis', port=REDIS_PORT, db=0)
@@ -69,7 +69,7 @@ def read_devices():
                 value1 = lookup_table1[value1, 0]
 
         if lookup_table2 is not None:
-            if value2 >= len(lookup_table2): # out of bounds 
+            if value2 >= len(lookup_table2): # out of bounds
                 value2 = lookup_table2[-1, 0]
                 print('Sensor 2 out of bounds')
             else:
