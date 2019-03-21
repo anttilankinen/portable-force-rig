@@ -5,9 +5,9 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-client": "cd client && npm run build",
-    "server": "node server.js",
-    "start": "npm run build-client && npm run server"
+    "build-client": "cd dashboard && npm run build",
+    "start": "node server.js",
+    "serve": "npm run build-client && npm start"
   },
   "author": "",
   "license": "ISC",

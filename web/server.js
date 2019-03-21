@@ -1,19 +1,20 @@
 const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
-const server = express();
+const app = express();
 
-server.use(express.static(path.join(__dirname, 'client/build')));
+app.use('/', express.static(path.join(__dirname + '/landing')));
+app.use('/dashboard', express.static(path.join(__dirname + '/dashboard/build')));
 
-server.get('/api/data', (req, res) => {
-  res.json({ response: "Hello" });
+app.get('/api/data', (req, res) => {
+  res.json({ response: 'Hello' });
 });
 
-server.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+app.get('*', (req, res) => {
+  res.redirect('/');
 });
 
 const port = process.env.PORT || 3001;
-server.listen(port, () => {
+app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
