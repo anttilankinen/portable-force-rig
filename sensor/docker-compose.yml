@@ -15,13 +15,13 @@ services:
       - ./service.video-stream/recordings:/usr/share/nginx/html/recordings
 
   service.api-gateway:
-    image: portable-force-rig/drawbridge:1.0
+    image: jaceys/viaduct
     env_file: ./.env
     container_name: service.api-gateway
     ports:
       - 7001:80
     volumes:
-      - ./service.api-gateway/config.yaml:/config/config.yaml
+      - ./service.api-gateway/config.yml:/config/config.yml
 
   service.event-bus:
     build: ./service.event-bus
