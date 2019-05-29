@@ -1,4 +1,4 @@
-services:
+apis:
   service.core-api:
     name: Core API
     prefix: api/rpi
