@@ -62,9 +62,7 @@ services:
       - 7004:80
     volumes:
       - ./service.sensor-controller:/usr/src/app
-      - type: bind
-        source: ./service.calibration/lookup
-        target: /usr/src/app/lookup
+      - ./service.calibration/lookup:/usr/src/app/lookup
     privileged: true
 
   service.cloud-db:

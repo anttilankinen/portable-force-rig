@@ -10,7 +10,7 @@ export default class Calibrate extends Component {
     count: 0,
     weight: '',
     antSize: 'Large',
-    sensor: 1,
+    sensor: 'left',
     status: 'Click \'Calibrate\' to start calibrating'
   }
 
@@ -90,7 +90,7 @@ export default class Calibrate extends Component {
             disabled={!count}
             loading={!ready}
             onChange={this.handleChange}
-            placeholder='Enter weight (N)'
+            placeholder='Enter weight (g)'
             value={weight}
           />
         </div>

@@ -20,6 +20,7 @@ export default class Dashboard extends Component {
 
   startRecording = () => {
     const id = uuidv4();
+    this.setState({ currentId: id });
     fetch('http://localhost:7007/record/begin', {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
@@ -27,7 +28,6 @@ export default class Dashboard extends Component {
     }).then(res => res.text())
     .then(string => {
       console.log(string);
-      this.setState({ currentId: id });
     });
 
     fetch('/api/sensor/start', {
@@ -116,9 +116,7 @@ export default class Dashboard extends Component {
             <i className="download icon"></i>Save
           </button>
         </div>
-        <video src="http://localhost:7007/stream.mjpg" type="video/mp4" width="600" height="400" style={{ padding: '40px'}}>
-          Live preview
-        </video>
+        <img src="http://localhost:7007/stream.mjpg" alt="Video stream currently unavailable" width="640" height="480" />
       </div>
     );
   }

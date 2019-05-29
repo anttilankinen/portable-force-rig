@@ -8,13 +8,12 @@ import numpy as np
 import sys
 
 REDIS_PORT = int(os.getenv('REDIS_PORT'))
-DEV1_ADDRESS = 0x05
-DEV2_ADDRESS = 0x06
 
 app = Flask(__name__)
 redis_client = redis.StrictRedis(host='redis', port=REDIS_PORT, db=0)
-reddis_channel = redis_client.pubsub()
+redis_channel = redis_client.pubsub()
 
+OUT_FILE = None
 INTERVAL = 25 # in ms
 ELAPSED_TIME = 0
 READ_THREAD = None
@@ -61,6 +60,9 @@ def read_devices():
             value2 = 0
             ZEROED = True
 
+        value1 = max(0, value1)
+        value2 = max(0, value2)
+
         if lookup_table1 is not None:
             if value1 >= len(lookup_table1): # out of bounds
                 value1 = lookup_table1[-1, 0]
@@ -75,8 +77,9 @@ def read_devices():
             else:
                 value2 = lookup_table2[value2, 0]
 
-        average = (value1[0] + value2[0]) / 2
-        redis_client.publish('sensor-data', "{:.3f}".format(average))
+        OUT_FILE.write('%.4f, %.4f, %.2f\n' % (value1, value2, ELAPSED_TIME))
+        average = (value1 + value2) / 2
+        redis_client.publish('sensor-data', "{:.3f}".format(value1))
         time.sleep(INTERVAL / float(1000))
         ELAPSED_TIME = ELAPSED_TIME + INTERVAL
 
@@ -87,6 +90,7 @@ def start():
     global THREAD_IS_RUN
     global READ_THREAD
     global ELAPSED_TIME
+    global OUT_FILE
     global lookup_table1
     global lookup_table2
 
@@ -94,14 +98,15 @@ def start():
     size = data['size']
 
     if data is not None and lookup_table1 is None:
-        lookup_table1 = np.load(f'./lookup/{DEV1_ADDRESS}_{size}')
+        lookup_table1 = np.load('./lookup/' + size + '_' + str(DEV1_ADDRESS) + '.npy')
 
     if data is not None and lookup_table2 is None:
-        lookup_table2 = np.load(f'./lookup/{DEV2_ADDRESS}_{size}')
+        lookup_table2 = np.load('./lookup/' + size + '_' + str(DEV2_ADDRESS) + '.npy')
 
     if READ_THREAD is None:
         ELAPSED_TIME = 0
         THREAD_IS_RUN = True
+        OUT_FILE = open('./saved-readings/' + str(int(time.time())) + '.txt', 'w')
         READ_THREAD = threading.Thread(target=read_devices)
         READ_THREAD.start()
         return 'Started reading from sensor..'
@@ -126,6 +131,10 @@ def stop():
     return 'Sensor not running..'
 
 if __name__ == '__main__':
+    app.config.from_object('config.default')
+    DEV1_ADDRESS = app.config['DEV1_ADDRESS']
+    DEV2_ADDRESS = app.config['DEV2_ADDRESS']
+
     # try to connect to sensor
     try:
         DEV_CTX = smbus2.SMBus(DEV_BUS)

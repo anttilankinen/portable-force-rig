@@ -119,10 +119,10 @@ def calibrate():
     data = request.get_json()
 
     if data is not None and CURRENT_ADDRESS is None:
-        if data['sensor'] == 1:
-            CURRENT_ADDRESS = 0x05
+        if data['sensor'] == 'left':
+            CURRENT_ADDRESS = app.config['DEV1_ADDRESS']
         else:
-            CURRENT_ADDRESS = 0x06
+            CURRENT_ADDRESS = app.config['DEV2_ADDRESS']
 
     if data is not None and CURRENT_SIZE is None:
         CURRENT_SIZE = data['size']
@@ -152,6 +152,7 @@ def calibrate():
         print('Finishing..')
         THREAD_IS_RUN = False
         READ_THREAD.join()
+        READ_THREAD = None
         train_data = train_data[:data_collected, :]
         return 'Ready for next weight..'
     return 'Calibration already started..'
@@ -169,8 +170,8 @@ def create_lookup():
         return 'Nothing to be calibrated'
 
     print('Computing look-up table..')
-    np.save(f'./lookup/{CURRENT_ADDRESS}_{CURRENT_SIZE}', calibration_function(train_data))
-    np.save(f'./train_data/{CURRENT_ADDRESS}_{CURRENT_SIZE}', train_data)
+    np.save('./lookup/' + CURRENT_SIZE + '_' + str(CURRENT_ADDRESS), calibration_function(train_data))
+    np.save('./train_data/' + CURRENT_SIZE + '_' + str(CURRENT_ADDRESS), train_data)
     print('Look-up table created!')
 
     CURRENT_ADDRESS = None
@@ -187,6 +188,8 @@ def show_calibration():
     return { 'calibration': json.dumps(train_data.tolist()) }
 
 if __name__ == '__main__':
+    app.config.from_object('config.default')
+
     try:
         DEV_CTX = smbus2.SMBus(DEV_BUS)
 

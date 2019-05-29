@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
 echo "Starting portable force rig application.."
-/etc/rc.local
+docker-compose up -d &
+cd ./service.calibration && python3 main.py &
+cd ./service.video-stream && python3 main.py &

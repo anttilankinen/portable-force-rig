@@ -4,14 +4,14 @@ import { Select } from 'semantic-ui-react';
 
 const options = [
   {
-    key: 1,
+    key: 'L',
     text: 'Sensor 1 (L)',
-    value: 1
+    value: 'left'
   },
   {
-    key: 2,
+    key: 'R',
     text: 'Sensor 2 (R)',
-    value: 2
+    value: 'right'
   }
 ];
 
@@ -32,7 +32,7 @@ export default class SensorInput extends Component {
         <h4>{this.state.status}</h4>
         <div style={{ margin: '20px 0' }}>
           <Select
-            defaultValue={1}
+            defaultValue={'left'}
             value={options.value}
             onChange={(event, {value}) => handleChange(value)}
             options={options}
