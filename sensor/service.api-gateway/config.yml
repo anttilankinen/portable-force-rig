@@ -1,4 +1,4 @@
-apis:
+services:
   service.core-api:
     name: Core API
     prefix: api/rpi
@@ -9,12 +9,6 @@ apis:
     name: Sensor Controller Service
     prefix: api/sensor
     upstream_url: http://service.sensor-controller
-    allow_cross_origin: true
-
-  service.calibration:
-    name: Calibration Service
-    prefix: api/calibration
-    upstream_url: http://localhost:7006
     allow_cross_origin: true
 
   service.cloud-db:
