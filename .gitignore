@@ -23,5 +23,3 @@ yarn-error.log*
 saved-readings/
 recordings/
 __pycache__/
-
-web/

@@ -21,7 +21,7 @@ services:
     ports:
       - 7001:80
     volumes:
-      - ./service.api-gateway/config.yml:/config/config.yml
+      - ./service.api-gateway/config.yaml:/config/config.yaml
 
   service.event-bus:
     build: ./service.event-bus
