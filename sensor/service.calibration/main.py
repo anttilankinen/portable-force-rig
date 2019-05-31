@@ -20,7 +20,6 @@ DEV_BUS = 1
 DEV_CTX = None
 ZEROED = False
 BIAS = 0
-CURRENT_ADDRESS = None
 CURRENT_SIZE = None
 train_data = None
 data_collected = 0
@@ -82,7 +81,7 @@ def read_device(weight, datapoints=100):
     while THREAD_IS_RUN:
         value1, frameindex1 = 0, 0
         try:
-            data1 = DEV_CTX.read_i2c_block_data(CURRENT_ADDRESS, 0x00, 6)
+            data1 = DEV_CTX.read_i2c_block_data(DEV_ADDRESS, 0x00, 6)
             frameindex1 = data1[0] << 8 | data1[1]
             timestamp1 = data1[2] << 8 | data1[3]
             value1 = (data1[4] << 8 | data1[5]) - 255
@@ -112,17 +111,10 @@ def read_device(weight, datapoints=100):
 def calibrate():
     global READ_THREAD
     global THREAD_IS_RUN
-    global CURRENT_ADDRESS
     global CURRENT_SIZE
     global train_data
 
     data = request.get_json()
-
-    if data is not None and CURRENT_ADDRESS is None:
-        if data['sensor'] == 'left':
-            CURRENT_ADDRESS = app.config['DEV1_ADDRESS']
-        else:
-            CURRENT_ADDRESS = app.config['DEV2_ADDRESS']
 
     if data is not None and CURRENT_SIZE is None:
         CURRENT_SIZE = data['size']
@@ -130,7 +122,7 @@ def calibrate():
     # read some values, since the first read after connecting will be faulty
     for i in range(5):
         try:
-            data1 = DEV_CTX.read_i2c_block_data(CURRENT_ADDRESS, 0x00, 6)
+            data1 = DEV_CTX.read_i2c_block_data(DEV_ADDRESS, 0x00, 6)
             frameindex1 = data1[0] << 8 | data1[1]
             timestamp1 = data1[2] << 8 | data1[3]
             value1 = (data1[4] << 8 | data1[5]) - 255
@@ -161,7 +153,6 @@ def calibrate():
 def create_lookup():
     global ZEROED
     global BIAS
-    global CURRENT_ADDRESS
     global CURRENT_SIZE
     global train_data
     global data_collected
@@ -170,11 +161,10 @@ def create_lookup():
         return 'Nothing to be calibrated'
 
     print('Computing look-up table..')
-    np.save('./lookup/' + CURRENT_SIZE + '_' + str(CURRENT_ADDRESS), calibration_function(train_data))
-    np.save('./train_data/' + CURRENT_SIZE + '_' + str(CURRENT_ADDRESS), train_data)
+    np.save('./lookup/' + CURRENT_SIZE + '_' + str(DEV_ADDRESS), calibration_function(train_data))
+    np.save('./train_data/' + CURRENT_SIZE + '_' + str(DEV_ADDRESS), train_data)
     print('Look-up table created!')
 
-    CURRENT_ADDRESS = None
     CURRENT_SIZE = None
     ZEROED = False
     BIAS = 0
@@ -189,6 +179,7 @@ def show_calibration():
 
 if __name__ == '__main__':
     app.config.from_object('config.default')
+    DEV_ADDRESS = app.config['DEV_ADDRESS']
 
     try:
         DEV_CTX = smbus2.SMBus(DEV_BUS)

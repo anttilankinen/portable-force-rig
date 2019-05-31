@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Input } from 'semantic-ui-react';
 import AntSizeInput from '../AntSizeInput';
-import SensorInput from '../SensorInput';
 
 export default class Calibrate extends Component {
   state = {
@@ -10,7 +9,6 @@ export default class Calibrate extends Component {
     count: 0,
     weight: '',
     antSize: 'Large',
-    sensor: 'left',
     status: 'Click \'Calibrate\' to start calibrating'
   }
 
@@ -19,7 +17,7 @@ export default class Calibrate extends Component {
   }
 
   run = () => {
-    const { count, weight, antSize, sensor } = this.state;
+    const { count, weight, antSize } = this.state;
 
     this.setState({ ready: false, status: 'Calibrating..' });
     let value = count ? (weight ? weight : 0) : 0;
@@ -27,7 +25,7 @@ export default class Calibrate extends Component {
     fetch('http://localhost:7006/calibration/begin', {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ weight: value, size: antSize.toLowerCase(), sensor: sensor }),
+      body: JSON.stringify({ weight: value, size: antSize.toLowerCase() }),
     }).then(res => res.text())
     .then(string => {
       this.setState({
@@ -52,23 +50,18 @@ export default class Calibrate extends Component {
     this.setState({ weight: parseFloat(event.target.value) });
   }
 
-  updateSensor = (sensor) => {
-    this.setState({ sensor: sensor });
-  }
-
   updateAntSize = (antSize) => {
     this.setState({ antSize: antSize });
   }
 
   render() {
-    const { started, ready, count, weight, antSize, sensor, status } = this.state;
+    const { started, ready, count, weight, antSize, status } = this.state;
 
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
         <div style={{ margin: '20px 0' }}>
           <div style={{ margin: '20px 0' }}>
             <AntSizeInput antSize={antSize} handleChange={this.updateAntSize}/>
-            <SensorInput sensor={sensor} handleChange={this.updateSensor}/>
           </div>
           {!started &&
             <button className="ui teal button" onClick={this.start}>

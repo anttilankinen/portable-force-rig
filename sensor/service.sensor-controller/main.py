@@ -21,47 +21,35 @@ THREAD_IS_RUN = False
 DEV_BUS = 1
 DEV_CTX = None
 ZEROED = False
-BIAS1 = 0
-BIAS2 = 0
-lookup_table1 = None
-lookup_table2 = None
+BIAS = 0
+lookup_table = None
 
 def read_devices():
     global ELAPSED_TIME
     global ZEROED
-    global BIAS1
-    global BIAS2
+    global BIAS
 
     while THREAD_IS_RUN:
         value, frameindex = 0, 0
         try:
             # read hardware
             data1 = DEV_CTX.read_i2c_block_data(DEV1_ADDRESS, 0x00, 6)
-            data2 = DEV_CTX.read_i2c_block_data(DEV2_ADDRESS, 0x00, 6)
-
             frameindex1 = data1[0] << 8 | data1[1]
             timestamp1 = data1[2] << 8 | data1[3]
             value1 = (data1[4] << 8 | data1[5]) - 255
-            frameindex2 = data2[0] << 8 | data2[1]
-            timestamp2 = data2[2] << 8 | data2[3]
-            value2 = (data2[4] << 8 | data2[5]) - 255
 
         except IOError as e: # frequent
             continue
 
         if ZEROED:
-            value1 = value1 - BIAS1
-            value2 = value2 - BIAS2
+            value1 = value1 - BIAS
 
         else:
-            BIAS1 = value1
-            BIAS2 = value2
+            BIAS = value1
             value1 = 0
-            value2 = 0
             ZEROED = True
 
         value1 = max(0, value1)
-        value2 = max(0, value2)
 
         if lookup_table1 is not None:
             if value1 >= len(lookup_table1): # out of bounds
@@ -70,15 +58,7 @@ def read_devices():
             else:
                 value1 = lookup_table1[value1, 0]
 
-        if lookup_table2 is not None:
-            if value2 >= len(lookup_table2): # out of bounds
-                value2 = lookup_table2[-1, 0]
-                print('Sensor 2 out of bounds')
-            else:
-                value2 = lookup_table2[value2, 0]
-
-        OUT_FILE.write('%.4f, %.4f, %.2f\n' % (value1, value2, ELAPSED_TIME))
-        average = (value1 + value2) / 2
+        OUT_FILE.write('%.4f, %.4f, %.2f\n' % (value1, ELAPSED_TIME))
         redis_client.publish('sensor-data', "{:.3f}".format(value1))
         time.sleep(INTERVAL / float(1000))
         ELAPSED_TIME = ELAPSED_TIME + INTERVAL
@@ -91,17 +71,13 @@ def start():
     global READ_THREAD
     global ELAPSED_TIME
     global OUT_FILE
-    global lookup_table1
-    global lookup_table2
+    global lookup_table
 
     data = request.get_json()
     size = data['size']
 
-    if data is not None and lookup_table1 is None:
-        lookup_table1 = np.load('./lookup/' + size + '_' + str(DEV1_ADDRESS) + '.npy')
-
-    if data is not None and lookup_table2 is None:
-        lookup_table2 = np.load('./lookup/' + size + '_' + str(DEV2_ADDRESS) + '.npy')
+    if data is not None and lookup_table is None:
+        lookup_table = np.load('./lookup/' + size + '_' + str(DEV_ADDRESS) + '.npy')
 
     if READ_THREAD is None:
         ELAPSED_TIME = 0
@@ -118,22 +94,19 @@ def stop():
     # stop reading
     global THREAD_IS_RUN
     global READ_THREAD
-    global lookup_table1
-    global lookup_table2
+    global lookup_table
 
     if READ_THREAD is not None:
         THREAD_IS_RUN = False
         READ_THREAD.join()
         READ_THREAD = None
-        lookup_table1 = None
-        lookup_table2 = None
+        lookup_table = None
         return 'Stopped reading from sensor..'
     return 'Sensor not running..'
 
 if __name__ == '__main__':
     app.config.from_object('config.default')
-    DEV1_ADDRESS = app.config['DEV1_ADDRESS']
-    DEV2_ADDRESS = app.config['DEV2_ADDRESS']
+    DEV_ADDRESS = app.config['DEV_ADDRESS']
 
     # try to connect to sensor
     try:
