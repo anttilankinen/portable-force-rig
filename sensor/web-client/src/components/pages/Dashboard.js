@@ -84,6 +84,24 @@ export default class Dashboard extends Component {
   }
 
   componentWillUnmount() {
+    if (started) {
+      fetch('/api/sensor/stop')
+      .then(res => res.text())
+      .then(string => {
+        console.log(string);
+      });
+    }
+    if (current && current.length) {
+      const JSONdata = JSON.stringify({ id: currentId, antSize: antSize, data: current });
+      fetch('/api/rpi/data', {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSONdata,
+      }).then(res => res.text())
+      .then(string => {
+        console.log(string);
+      });
+    }
     this.socket.close();
   }
 

@@ -58,7 +58,7 @@ export default class History extends Component {
         antSize: row.ant_size,
         readings: row.readings
       }));
-      this.setState({ saved: history });
+      this.setState({ saved: history.reverse() });
     })
     .catch(err => console.log(err));
   }
