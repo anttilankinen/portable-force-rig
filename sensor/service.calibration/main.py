@@ -7,6 +7,7 @@ from flask import Flask, request
 from flask_cors import CORS
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
+from scipy.optimize import curve_fit
 
 app = Flask(__name__)
 CORS(app)
@@ -37,13 +38,34 @@ def calibration_function(train_data):
     lm = LinearRegression(fit_intercept=False).fit(x, y)
 
     # look-up table
-    input = np.arange(769).reshape(-1, 1)
-    poly_input = poly.fit_transform(input)
+    sensor_range = np.arange(769).reshape(-1, 1)
+    poly_input = poly.fit_transform(sensor_range)
     # look-up table is just an array which can be used just by the index as
     # input is integer-valued
     lookup_table = lm.predict(poly_input)
 
     return lookup_table
+
+def f(x, a, b, c):
+    return a * x + b * x ** 2 + c * x ** 3
+
+def calibration_function2(train_data):
+    # compute calibration mapping using polynomial regression
+    x = train_data[:,0]
+    y = train_data[:,1]
+
+    valid = np.where(x != -255)
+    x = x[valid]
+    y = y[valid]
+
+    popt, pcov = curve_fit(f, x, y, bounds=(0, np.inf))
+    sensor_range = np.arange(769).reshape(-1, 1)
+    
+    return f(sensor_range, popt[0], popt[1], popt[2])
+
+
+
+
 
 def read_device(weight, datapoints=100):
     global THREAD_IS_RUN
