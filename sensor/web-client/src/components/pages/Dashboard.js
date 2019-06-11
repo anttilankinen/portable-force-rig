@@ -84,6 +84,7 @@ export default class Dashboard extends Component {
   }
 
   componentWillUnmount() {
+    const { antSize, current, currentId, started } = this.state;
     if (started) {
       fetch('/api/sensor/stop')
       .then(res => res.text())
