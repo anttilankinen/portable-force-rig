@@ -30,11 +30,7 @@ export default class Dashboard extends Component {
       console.log(string);
     });
 
-    fetch('/api/sensor/start', {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ size: this.state.antSize.toLowerCase() }),
-    })
+    fetch('/api/sensor/start')
     .then(res => res.text())
     .then(string => {
       console.log(string);

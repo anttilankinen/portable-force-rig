@@ -52,7 +52,7 @@ def clip_buffer(id):
     while THREAD_IS_RUN:
         try:
             print('Waiting')
-            camera.wait_recording(10)
+            camera.wait_recording(0, splitter_port=2)
         except Exception as e:
             print(e)
 

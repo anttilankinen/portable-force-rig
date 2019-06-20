@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Select } from 'semantic-ui-react';
 
-
 const options = [
   {
     key: 'L',

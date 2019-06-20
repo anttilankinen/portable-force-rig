@@ -22,7 +22,6 @@ DEV_BUS = 1
 DEV_CTX = None
 ZEROED = False
 BIAS = 0
-lookup_table = None
 
 def read_devices():
     global ELAPSED_TIME
@@ -33,51 +32,44 @@ def read_devices():
         value, frameindex = 0, 0
         try:
             # read hardware
-            data1 = DEV_CTX.read_i2c_block_data(DEV1_ADDRESS, 0x00, 6)
-            frameindex1 = data1[0] << 8 | data1[1]
-            timestamp1 = data1[2] << 8 | data1[3]
-            value1 = (data1[4] << 8 | data1[5]) - 255
+            data1 = DEV_CTX.read_i2c_block_data(DEV_ADDRESS, 0x00, 6)
+            frameindex = data1[0] << 8 | data1[1]
+            timestamp = data1[2] << 8 | data1[3]
+            value = (data1[4] << 8 | data1[5]) - 255
 
         except IOError as e: # frequent
             continue
 
         if ZEROED:
-            value1 = value1 - BIAS
+            value = value - BIAS
 
         else:
-            BIAS = value1
-            value1 = 0
+            BIAS = value
+            value = 0
             ZEROED = True
 
-        value1 = max(0, value1)
+        value = max(0, value)
 
-        if lookup_table1 is not None:
-            if value1 >= len(lookup_table1): # out of bounds
-                value1 = lookup_table1[-1, 0]
-                print('Sensor 1 out of bounds')
+        if LOOKUP_TABLE is not None:
+            if value >= len(LOOKUP_TABLE): # out of bounds
+                value = LOOKUP_TABLE[-1, 0]
+                print('Sensor out of bounds')
             else:
-                value1 = lookup_table1[value1, 0]
+                value = LOOKUP_TABLE[value, 0]
 
-        OUT_FILE.write('%.4f, %.4f, %.2f\n' % (value1, ELAPSED_TIME))
-        redis_client.publish('sensor-data', "{:.3f}".format(value1))
+        OUT_FILE.write('%.4f, %.2f\n' % (value, ELAPSED_TIME))
+        redis_client.publish('sensor-data', "{:.3f}".format(value))
         time.sleep(INTERVAL / float(1000))
         ELAPSED_TIME = ELAPSED_TIME + INTERVAL
 
 # start process to read from GPIO
-@app.route('/start', methods=['POST'])
+@app.route('/start')
 def start():
     # read from GPIO
     global THREAD_IS_RUN
     global READ_THREAD
     global ELAPSED_TIME
     global OUT_FILE
-    global lookup_table
-
-    data = request.get_json()
-    size = data['size']
-
-    if data is not None and lookup_table is None:
-        lookup_table = np.load('./lookup/' + size + '_' + str(DEV_ADDRESS) + '.npy')
 
     if READ_THREAD is None:
         ELAPSED_TIME = 0
@@ -94,19 +86,18 @@ def stop():
     # stop reading
     global THREAD_IS_RUN
     global READ_THREAD
-    global lookup_table
 
     if READ_THREAD is not None:
         THREAD_IS_RUN = False
         READ_THREAD.join()
         READ_THREAD = None
-        lookup_table = None
         return 'Stopped reading from sensor..'
     return 'Sensor not running..'
 
 if __name__ == '__main__':
     app.config.from_object('config.default')
     DEV_ADDRESS = app.config['DEV_ADDRESS']
+    LOOKUP_TABLE = np.load(app.config['LOOKUP_TABLE'])
 
     # try to connect to sensor
     try:

@@ -6,9 +6,7 @@ import json
 import numpy as np
 from flask import Flask, request
 from flask_cors import CORS
-from scipy.interpolate import InterpolatedUnivariateSpline
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import PolynomialFeatures
+from scipy.optimize import curve_fit
 
 app = Flask(__name__)
 CORS(app)
@@ -20,7 +18,6 @@ DEV_BUS = 1
 DEV_CTX = None
 ZEROED = False
 BIAS = 0
-CURRENT_SIZE = None
 train_data = None
 data_collected = 0
 
@@ -34,32 +31,22 @@ def filter_data(dataset):
         out[i, 1] = value
     return out
 
-def calibration_function(train_data, method='spline'):
+def f(x, a, b, c):
+    return a * x + b * x ** 2 + c * x ** 3
+
+def calibration_function(train_data):
     # compute calibration mapping using polynomial regression
-    train_data = filter_data(train_data)
-    x = train_data[:,0].reshape(-1, 1)
-    y = train_data[:,1].reshape(-1, 1)
-    test_input = np.arange(np.max(x)).reshape(-1, 1)
+    x = train_data[:,0]
+    y = train_data[:,1]
 
-    if method == 'cubic': # use cubic polynomial regression
-        # transform to polynomial features
-        poly = PolynomialFeatures(degree=3, include_bias=False)
-        x = poly.fit_transform(x)
+    valid = np.where(x != -255)
+    x = x[valid]
+    y = y[valid]
 
-        lm = LinearRegression(fit_intercept=False).fit(x, y)
+    popt, pcov = curve_fit(f, x, y, bounds=(0, np.inf))
+    sensor_range = np.arange(769).reshape(-1, 1)
 
-        # look-up table
-        poly_input = poly.fit_transform(test_input)
-        # look-up table is just an array which can be used just by the index as
-        # input is integer-valued
-        lookup_table = lm.predict(poly_input)
-    elif method == 'spline': # use a cubic smoothing spline
-        spl = InterpolatedUnivariateSpline(x, y, k=min(3, len(x) - 1))
-        lookup_table = spl(test_input)
-    else:
-        print('Incorrect calibration method specified, use "cubic" or "spline"')
-        return np.empty([1]) # return this so rest doesn't crash
-    return lookup_table
+    return f(sensor_range, popt[0], popt[1], popt[2])
 
 def read_device(weight, datapoints=100):
     global ZEROED
@@ -79,12 +66,13 @@ def read_device(weight, datapoints=100):
     data_size = train_data.shape[0]
 
     while THREAD_IS_RUN:
-        value1, frameindex1 = 0, 0
+        value, frameindex1 = 0, 0
         try:
             data1 = DEV_CTX.read_i2c_block_data(DEV_ADDRESS, 0x00, 6)
             frameindex1 = data1[0] << 8 | data1[1]
             timestamp1 = data1[2] << 8 | data1[3]
-            value1 = (data1[4] << 8 | data1[5]) - 255
+            value = (data1[4] << 8 | data1[5]) - 255
+            print(value)
 
         except IOError as e: # frequent
             continue
@@ -92,18 +80,18 @@ def read_device(weight, datapoints=100):
         if frameindex1 == 0xffff and timestamp1 == 0xffff: #i2c read error
             continue
 
-        if value1 > 768: #out of bounds
+        if value > 768: #out of bounds
             continue
 
         if ZEROED:
-            value1 = value1 - BIAS
+            value = value - BIAS
 
         else:
-            BIAS = value1
-            value1 = 0
+            BIAS = value
+            value = 0
             ZEROED = True
 
-        train_data[data_collected, 0] = value1
+        train_data[data_collected, 0] = value
         data_collected = data_collected + 1
         time.sleep(INTERVAL / float(1000))
 
@@ -111,13 +99,10 @@ def read_device(weight, datapoints=100):
 def calibrate():
     global READ_THREAD
     global THREAD_IS_RUN
-    global CURRENT_SIZE
     global train_data
 
     data = request.get_json()
-
-    if data is not None and CURRENT_SIZE is None:
-        CURRENT_SIZE = data['size']
+    weight = 0.00981 * data['weight']
 
     # read some values, since the first read after connecting will be faulty
     for i in range(5):
@@ -125,12 +110,11 @@ def calibrate():
             data1 = DEV_CTX.read_i2c_block_data(DEV_ADDRESS, 0x00, 6)
             frameindex1 = data1[0] << 8 | data1[1]
             timestamp1 = data1[2] << 8 | data1[3]
-            value1 = (data1[4] << 8 | data1[5]) - 255
+            value = (data1[4] << 8 | data1[5]) - 255
 
         except IOError as e: # frequent
             continue
 
-    weight = 0.00981 * data['weight']
     # if sensor not started
     if data is not None and READ_THREAD is None:
         print('Calibrating for weight: ' + str(weight))
@@ -153,7 +137,6 @@ def calibrate():
 def create_lookup():
     global ZEROED
     global BIAS
-    global CURRENT_SIZE
     global train_data
     global data_collected
 
@@ -161,8 +144,8 @@ def create_lookup():
         return 'Nothing to be calibrated'
 
     print('Computing look-up table..')
-    np.save('./lookup/' + CURRENT_SIZE + '_' + str(DEV_ADDRESS), calibration_function(train_data))
-    np.save('./train_data/' + CURRENT_SIZE + '_' + str(DEV_ADDRESS), train_data)
+    np.save('./lookup/main', calibration_function(train_data))
+    np.save('./train_data/main', train_data)
     print('Look-up table created!')
 
     CURRENT_SIZE = None
