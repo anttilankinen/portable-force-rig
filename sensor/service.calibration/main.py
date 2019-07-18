@@ -23,45 +23,59 @@ BIAS1 = 0
 train_data = None
 data_collected = 0
 
-def calibration_function(train_data):
-    # compute calibration mapping using polynomial regression
-    x = train_data[:,0]
-    y = train_data[:,1]
-    valid = np.where(x != -255)
-    x = x[valid].reshape(-1, 1)
-    # transform to polynomial features
-    poly = PolynomialFeatures(degree=3, include_bias=False)
-    x = poly.fit_transform(x)
+def f(x, *p):
+    # the general shape of the calibration function
+    # p can be of variable length (but divisible by 2)
+    # p = [c_1, e_1, c_2, e_2, ... , c_n, e_n] where c_i is a coefficient and
+    # e_i is an exponent of a term
+    # f = c_1 * x ^ e_1 + c_2 * x ^ e_2 + ... + c_n * x ^ e_n
+    p = np.reshape(p, (-1, 2))
+    return sum(p[i, 0] * np.sign(x) * np.abs(x) ** p[i, 1] for i in range(np.shape(p)[0]))
 
-    y = y[valid].reshape(-1, 1)
-
-    lm = LinearRegression(fit_intercept=False).fit(x, y)
-
-    # look-up table
-    sensor_range = np.arange(769).reshape(-1, 1)
-    poly_input = poly.fit_transform(sensor_range)
-    # look-up table is just an array which can be used just by the index as
-    # input is integer-valued
-    lookup_table = lm.predict(poly_input)
-
-    return lookup_table
-
-def f(x, a, b, c):
-    return a * x + b * x ** 2 + c * x ** 3
+def AIC(y, y_pred, k):
+    rss = sum((y - y_pred) ** 2)
+    n = len(y)
+    return 2 * k + n * np.log(rss)
 
 def calibration_function2(train_data):
     # compute calibration mapping using polynomial regression
+    # two possibilites of the function shape are used:
+    # 1. second derivative nonnegative (more likely)
+    # 2. second derivative nonpositive (included for generality)
+    # this is to avoid "wiggling" of the curve
     x = train_data[:,0]
     y = train_data[:,1]
 
     valid = np.where(x != -255)
     x = x[valid]
     y = y[valid]
-
-    popt, pcov = curve_fit(f, x, y, bounds=(0, np.inf))
-    sensor_range = np.arange(769).reshape(-1, 1)
+    aic_min = np.inf
     
-    return f(sensor_range, popt[0], popt[1], popt[2])
+    for i in range(5):
+        k = 2 * (i + 1) # number of parameters in model
+
+        # positive second derivative
+        # bounds for coefficients (nonnegative) and exponents (larger than one)
+        bounds = ([0, 1] * (i + 1), np.inf) # coefficients, exponents
+        popt, pcov = curve_fit(f, x, y, p0 = np.ones(k), bounds=bounds, maxfev=5000)
+        y_pred = f(x, popt)
+        aic = AIC(y, y_pred, k)
+        if aic < aic_min:
+            aic_min = aic
+            p = popt
+        
+        # negative second derivative
+        bounds = (0, [np.inf, 1] * (i + 1)) # coefficients, exponents
+        popt, pcov = curve_fit(f, x, y, p0 = np.ones(k), bounds=bounds, maxfev=5000)
+        y_pred = f(x, popt)
+        aic = AIC(y, y_pred, k)
+        if aic < aic_min:
+            aic_min = aic
+            p = popt
+
+    #popt, pcov = curve_fit(f, x, y, bounds=(0, np.inf))
+    sensor_range = np.arange(769).reshape(-1, 1)
+    return f(sensor_range, p)
 
 
 

@@ -65,6 +65,7 @@ def calibration_function2(train_data):
 
     #popt, pcov = curve_fit(f, x, y, bounds=(0, np.inf))
     sensor_range = np.arange(max(x) + 1).reshape(-1, 1)
+    print(p)
     return f(sensor_range, p)
 
 data_dir = '~/Projects/portable-force-rig/misc/train_data/'
